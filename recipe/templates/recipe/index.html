@@ -1,10 +1,66 @@
 {% extends 'base.html' %}
 
-{% block title%}Login{% endblock%}
+{% block title %}Recipes{% endblock %}
 
-{% block content%}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
 
-    <h1>All Recipe</h1>
+    <h1 class="text-3xl font-bold mb-8">Explore Recipes</h1>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for recipe in recipes %}
 
-{% endblock%}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            {% if recipe.food_pic %}
+                <img src="{{ recipe.food_pic.url }}" alt="{{ recipe.title }}" class="w-full h-48 object-cover">
+            {% else %}
+                <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <span class="text-gray-400">No image available</span>
+                </div>
+            {% endif %}
+
+            <div class="p-4">
+                <h2 class="text-xl font-semibold mb-2">{{ recipe.title }}</h2>
+
+                <p class="text-gray-600 mb-4 line-clamp-2">{{ recipe.description }}</p>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ recipe.cooking_time }} mins</span>
+                    </div>
+
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span>{{ recipe.servings }} servings</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                        {{ recipe.category.name }}
+                    </span>
+
+                    <a href="{% url 'recipe:detail' recipe.id %}"
+                       class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        View Recipe
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <h3 class="text-xl text-gray-600">No recipes found</h3>
+            <p class="mt-2 text-gray-500">Be the first to add a recipe!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -4,10 +4,51 @@
 
 {% block content%}
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" action="{% url 'users:register' %}">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
+
+        <div class="mb-3">
+            <label class="inline-block mb-3">Username</label>
+            {{ form.username }}
+        </div>
+
+        <div class="mb-3">
+            <label class="inline-block mb-3">Email</label>
+            {{ form.email }}
+        </div>
+
+        <div class="mb-3">
+            <label class="inline-block mb-3">Password</label>
+            {{ form.password1 }}
+        </div>
+
+        <div class="mb-3">
+            <label class="inline-block mb-3">Confirmation Password</label>
+            {{ form.password2 }}
+        </div>
+
+        <div class="mb-3">
+            <label class="inline-block mb-3">Description</label>
+            {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+            <label class="inline-block mb-3">Profile Picture</label>
+            {{ form.profile_picture }}
+        </div>
+
+        {% if form.errors or form.non_field_errors %}
+            <div class="mb-3 p-6 bg-red-100 rounded-xl">
+                {% for field in form %}
+                    {{ field.errors }}
+                {% endfor %}
+
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+
+        <button type="submit" class="py-4 px-8 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Register</button>
     </form>
 
 
