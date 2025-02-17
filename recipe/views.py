@@ -17,35 +17,45 @@ def recipe_detail(request, recipe_id):
     recipe = Recipe.objects.get(pk=recipe_id)
     ingredients = RecipeIngredient.objects.filter(recipe=recipe)
     instructions = Instruction.objects.filter(recipe=recipe)
-    nutrition_info = NutritionalInfo.objects.filter(recipe=recipe)
+    nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
+    categories = recipe.categories.all()  # Category.objects.filter(recipe=recipe)
 
-    return render(request, "recipe/detail.html", {"recipe": recipe, "ingredients": ingredients, "instructions": instructions, "nutrition_info": nutrition_info})
+    return render(request, "recipe/detail.html",
+                  {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
+                   "nutrition_info": nutrition_info, "categories": categories})
 
 
 def add_recipe(request):
     if request.method == "POST":
         nutrition_form = NutritionalInfoForm(request.POST)
 
+        # Process selected categories (existing ones)
+        category_ids = request.POST.get("existing_categories")  # Get selected categories
+
+        if category_ids:
+            category_ids = category_ids.split(",")
+
+        new_category_names = request.POST.get("new_categories")  # Get new categories input
+
+        if new_category_names:
+            new_category_names = new_category_names.split(",")
+
+        print(category_ids)
+        print(new_category_names)
+
+        # Validate category input
+        if not category_ids and not new_category_names:
+            raise ValidationError("At least one category is required.")
+
         try:
             with transaction.atomic():
-                # Validate basic recipe data
-
-                # Validate basic recipe data
-                category_id = request.POST.get("category")
-                if not category_id:
-                    raise ValidationError("Category is required.")
-
-                try:
-                    category = Category.objects.get(pk=category_id)
-                except Category.DoesNotExist:
-                    raise ValidationError("Invalid category selected.")
 
                 recipe_data = {
                     "title": request.POST.get("title"),
                     "description": request.POST.get("description"),
                     "cooking_time": request.POST.get("cooking_time"),
                     "servings": request.POST.get("servings"),
-                    "category": category,
+                    "created_by": request.user
                 }
 
                 # Check required string fields
@@ -63,14 +73,30 @@ def add_recipe(request):
                         raise ValidationError(f"Invalid value for {field.replace('_', ' ')}")
 
                 # Create recipe instance
-                recipe = Recipe(
+                recipe = Recipe(  # Recipe.objects.create()
                     **recipe_data,
                     food_pic=request.FILES.get("food_pic") if "food_pic" in request.FILES else None
                 )
 
-                print("Recipe", recipe)
                 recipe.full_clean()  # Validate model fields
                 recipe.save()
+
+                # Add selected existing categories
+                for category_id in category_ids:
+                    try:
+                        category = Category.objects.get(pk=category_id)
+                        recipe.categories.add(category)
+                    except Category.DoesNotExist:
+                        raise ValidationError(f"Invalid category ID: {category_id}")
+
+                # Add newly created categories
+                for category_name in new_category_names:
+                    category_name = category_name.strip()
+                    if category_name:
+                        category, created = Category.objects.get_or_create(name=category_name)
+                        recipe.categories.add(category)
+
+                messages.success(request, "Recipe added successfully!")
 
                 # Process ingredients
                 ingredients = request.POST.getlist("ingredients[]")
@@ -84,7 +110,7 @@ def add_recipe(request):
                 recipe_ingredients = []
 
                 for i, (ingredient_id, new_ingredient, quantity, unit) in enumerate(
-                    zip(ingredients, new_ingredients, quantities, units)
+                        zip(ingredients, new_ingredients, quantities, units)
                 ):
                     if not quantity or (not ingredient_id and not new_ingredient.strip()):
                         continue
@@ -99,8 +125,7 @@ def add_recipe(request):
                     # Handle new or existing ingredient
                     if new_ingredient.strip():
                         ingredient, _ = Ingredient.objects.get_or_create(
-                            name=new_ingredient.strip(),
-                            defaults={"created_by": request.user}
+                            name=new_ingredient.strip()
                         )
                     else:
                         ingredient = Ingredient.objects.filter(id=ingredient_id).first()
@@ -143,6 +168,8 @@ def add_recipe(request):
 
         except ValidationError as e:
             messages.error(request, str(e))
+            print(str(e))
+
         except Exception as e:
             logger.exception("Error creating recipe")
             messages.error(request, "An unexpected error occurred. Please try again.")
@@ -158,3 +185,19 @@ def add_recipe(request):
     return render(request, "recipe/add_recipe.html", context)
 
 
+def edit(request, recipe_id: int):
+    recipe = Recipe.objects.get(pk=recipe_id)
+    ingredients = RecipeIngredient.objects.filter(recipe=recipe)
+    instructions = Instruction.objects.filter(recipe=recipe)
+    nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
+    categories = recipe.categories.all()  # Category.objects.filter(recipe=recipe)
+
+    return render(request, "recipe/edit_recipe.html",
+                  {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
+                   "nutrition_info": nutrition_info, "categories": categories})
+
+
+def delete(request, recipe_id: int):
+    recipe = Recipe.objects.get(pk=recipe_id)
+    recipe.delete()
+    return redirect("users:profile")

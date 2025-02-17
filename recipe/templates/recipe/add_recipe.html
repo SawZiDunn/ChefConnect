@@ -1,288 +1,202 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Add New Recipe{% endblock %}
 {% block content %}
 
-<div class="container mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
-    <h1 class="text-2xl font-bold mb-6">Add a New Recipe</h1>
+    <div class="container mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
+        <h1 class="text-2xl font-bold mb-6">Add a New Recipe</h1>
 
-    <form method="post" action="{% url 'recipe:add_recipe' %}" enctype="multipart/form-data" class="space-y-6">
-        {% csrf_token %}
+        <form method="post" action="{% url 'recipe:add_recipe' %}" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
 
-        <div class="p-4 border rounded-lg bg-gray-50">
+            <div class="p-4 border rounded-lg bg-gray-50">
 
-            <h2 class="text-xl font-semibold mb-4">Recipe Details</h2>
-            <div class="space-y-4">
-                <div class="flex flex-col">
-                    <label for="title" class="font-medium mb-1">Recipe Title</label>
-                    <input type="text" name="title" id="title" required
-                           class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                <h2 class="text-xl font-semibold mb-4">Recipe Details</h2>
+                <div class="space-y-4">
+                    <div class="flex flex-col">
+                        <label for="title" class="font-medium mb-1">Recipe Title</label>
+                        <input type="text" name="title" id="title" required
+                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="description" class="font-medium mb-1">Description</label>
+                        <textarea name="description" id="description" rows="3"
+                                  class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="category" class="font-medium mb-1">Category</label>
+
+                        <!-- Dropdown to select existing categories -->
+                        <select id="category-select" name="existing_categories" class="border rounded-lg p-2">
+                            <option value="">Choose category...</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Input field for adding a new category -->
+                    <div class="flex mt-3">
+                        <input type="text" id="new-category" placeholder="Add new category"
+                               class="border rounded-lg p-2 flex-grow mr-2">
+                        <button type="button" onclick="addNewCategory()"
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            Add
+                        </button>
+                    </div>
+
+                    <!-- Display selected categories -->
+                    <div id="selected-categories" class="flex flex-wrap gap-2 mt-3"></div>
+
+                    <!-- Hidden inputs to store selected categories -->
+                    <input type="hidden" name="existing_categories" id="existing-categories-input">
+                    <input type="hidden" name="new_categories" id="new-categories-input">
+
+
+                    <div class="flex flex-col">
+                        <label for="cooking_time" class="font-medium mb-1">Cooking Time (minutes)</label>
+                        <input type="number" name="cooking_time" id="cooking_time"
+                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="servings" class="font-medium mb-1">Servings</label>
+                        <input type="number" name="servings" id="servings"
+                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="image" class="font-medium mb-1">Recipe Image</label>
+                        <input type="file" name="food_pic" id="image" accept="image/*"
+                               class="border rounded-lg p-2">
+                    </div>
                 </div>
+            </div>
 
-                <div class="flex flex-col">
-                    <label for="description" class="font-medium mb-1">Description</label>
-                    <textarea name="description" id="description" rows="3"
-                            class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <h2 class="text-xl font-semibold mb-4">Ingredients</h2>
 
-                <div class="flex flex-col">
-                    <label for="category" class="font-medium mb-1">Category</label>
-                    <select name="category" class="border rounded-lg p-2">
-                                <option value="">Choose category...</option>
-                                {% for category in categories %}
-                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                <!-- Ingredient input form -->
+                <div class="ingredient-form space-y-2 p-2 border rounded-lg bg-white mb-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label class="font-medium mb-1">Select Ingredient</label>
+                            <select id="ingredient-select" class="border rounded-lg p-2">
+                                <option value="">Choose ingredient...</option>
+                                {% for ingredient in ingredients %}
+                                    <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
                                 {% endfor %}
-                    </select>
-                </div>
+                            </select>
+                        </div>
 
-                <div class="flex flex-col">
-                    <label for="cooking_time" class="font-medium mb-1">Cooking Time (minutes)</label>
-                    <input type="number" name="cooking_time" id="cooking_time"
-                           class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="servings" class="font-medium mb-1">Servings</label>
-                    <input type="number" name="servings" id="servings"
-                           class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="image" class="font-medium mb-1">Recipe Image</label>
-                    <input type="file" name="food_pic" id="image" accept="image/*"
-                           class="border rounded-lg p-2">
-                </div>
-            </div>
-        </div>
-
-        <div class="p-4 border rounded-lg bg-gray-50">
-    <h2 class="text-xl font-semibold mb-4">Ingredients</h2>
-
-    <!-- Ingredient input form -->
-    <div class="ingredient-form space-y-2 p-2 border rounded-lg bg-white mb-4">
-        <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col">
-                <label class="font-medium mb-1">Select Ingredient</label>
-                <select id="ingredient-select" class="border rounded-lg p-2">
-                    <option value="">Choose ingredient...</option>
-                    {% for ingredient in ingredients %}
-                        <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="flex flex-col">
-                <label class="font-medium mb-1">Add New</label>
-                <input type="text" id="new-ingredient"
-                       class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col">
-                <label class="font-medium mb-1">Quantity</label>
-                <input type="number" step="0.01" id="quantity"
-                       class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div class="flex flex-col">
-                <label class="font-medium mb-1">Units</label>
-                <select id="units" class="border rounded-lg p-2">
-                    <option value="g">grams</option>
-                    <option value="ml">milliliters</option>
-                    <option value="tsp">teaspoons</option>
-                    <option value="tbsp">tablespoons</option>
-                    <option value="cup">cups</option>
-                    <option value="piece">pieces</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- List of added ingredients -->
-    <div id="ingredient-list" class="space-y-2">
-        <!-- Added ingredients will appear here -->
-    </div>
-
-    <!-- Hidden inputs to store the actual form data -->
-    <div id="ingredient-data" class="hidden">
-        <input type="hidden" name="ingredients[]">
-        <input type="hidden" name="new_ingredients[]">
-        <input type="hidden" name="quantities[]">
-        <input type="hidden" name="units[]">
-    </div>
-
-    <button type="button" id="add-ingredient" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-        Add Ingredient
-    </button>
-</div>
-
-        <div class="p-4 border rounded-lg bg-gray-50">
-            <h2 class="text-xl font-semibold mb-4">Instructions</h2>
-
-            <!-- Instruction input form -->
-            <div class="instruction-form p-2 border rounded-lg bg-white mb-4">
-                <div class="flex flex-col">
-                    <label class="font-medium mb-1">Step</label>
-                    <textarea id="instruction-input" rows="2"
-                            class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-            </div>
-
-            <!-- List of added instructions -->
-            <div id="instruction-list" class="space-y-2">
-                <!-- Added instructions will appear here -->
-            </div>
-
-            <button type="button" id="add-instruction" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-                Add Step
-            </button>
-        </div>
-
-        <div class="p-4 border rounded-lg bg-gray-50">
-            <h2 class="text-xl font-semibold mb-4">Nutritional Info</h2>
-
-            <div class="flex flex-col">
-                <div class="flex flex-row">
-                    <div class="flex flex-col">
-                        <label>Protein</label>
-                        {{ nutrition_form.protein }}
+                        <div class="flex flex-col">
+                            <label class="font-medium mb-1">Add New</label>
+                            <input type="text" id="new-ingredient"
+                                   class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
 
-                    <div class="flex flex-col">
-                        <label>Carb</label>
-                        {{ nutrition_form.carb }}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label class="font-medium mb-1">Quantity</label>
+                            <input type="number" step="0.01" id="quantity"
+                                   class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="font-medium mb-1">Units</label>
+                            <select id="units" class="border rounded-lg p-2">
+                                <option value="g">grams</option>
+                                <option value="ml">milliliters</option>
+                                <option value="tsp">teaspoons</option>
+                                <option value="tbsp">tablespoons</option>
+                                <option value="cup">cups</option>
+                                <option value="piece">pieces</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-               <div class="flex flex-row">
+                <!-- List of added ingredients -->
+                <div id="ingredient-list" class="space-y-2">
+                    <!-- Added ingredients will appear here -->
+                </div>
+
+                <!-- Hidden inputs to store the actual form data -->
+                <div id="ingredient-data" class="hidden">
+                    <input type="hidden" name="ingredients[]">
+                    <input type="hidden" name="new_ingredients[]">
+                    <input type="hidden" name="quantities[]">
+                    <input type="hidden" name="units[]">
+                </div>
+
+                <button type="button" id="add-ingredient" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+                    Add Ingredient
+                </button>
+            </div>
+
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <h2 class="text-xl font-semibold mb-4">Instructions</h2>
+
+                <!-- Instruction input form -->
+                <div class="instruction-form p-2 border rounded-lg bg-white mb-4">
                     <div class="flex flex-col">
-                    <label>Fat</label>
-                    {{ nutrition_form.fat }}
+                        <label class="font-medium mb-1">Step</label>
+                        <textarea id="instruction-input" rows="2"
+                                  class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
                 </div>
 
-               <div class="flex flex-col">
-                    <label>Calories</label>
-                    {{ nutrition_form.calories }}
-                </div>
+                <!-- List of added instructions -->
+                <div id="instruction-list" class="space-y-2">
+                    <!-- Added instructions will appear here -->
                 </div>
 
+                <button type="button" id="add-instruction" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+                    Add Step
+                </button>
             </div>
-        </div>
 
-        <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded">Add Recipe</button>
-    </form>
-</div>
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <h2 class="text-xl font-semibold mb-4">Nutritional Info</h2>
 
+                <div class="flex flex-col">
+                    <div class="flex flex-row">
+                        <div class="flex flex-col">
+                            <label>Protein</label>
+                            {{ nutrition_form.protein }}
+                        </div>
 
-    <script>
+                        <div class="flex flex-col">
+                            <label>Carb</label>
+                            {{ nutrition_form.carb }}
+                        </div>
+                    </div>
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Ingredient Elements
-    const ingredientSelect = document.getElementById('ingredient-select');
-    const newIngredient = document.getElementById('new-ingredient');
-    const quantity = document.getElementById('quantity');
-    const units = document.getElementById('units');
-    const ingredientList = document.getElementById('ingredient-list');
-    const addIngredientButton = document.getElementById('add-ingredient');
+                    <div class="flex flex-row">
+                        <div class="flex flex-col">
+                            <label>Fat</label>
+                            {{ nutrition_form.fat }}
+                        </div>
 
-    // Instruction Elements
-    const instructionInput = document.getElementById('instruction-input');
-    const instructionList = document.getElementById('instruction-list');
-    const addInstructionButton = document.getElementById('add-instruction');
-    let stepCount = 1;
+                        <div class="flex flex-col">
+                            <label>Calories</label>
+                            {{ nutrition_form.calories }}
+                        </div>
+                    </div>
 
-    // Clear other input when one is being used
-    ingredientSelect.addEventListener('change', function() {
-        if (this.value) newIngredient.value = '';
-    });
-
-    newIngredient.addEventListener('input', function() {
-        if (this.value) ingredientSelect.value = '';
-    });
-
-    addIngredientButton.addEventListener('click', function() {
-        const selectedIngredient = ingredientSelect.value;
-        const newIngredientValue = newIngredient.value.trim();
-        const quantityValue = quantity.value.trim();
-        const unitsValue = units.value;
-
-        if ((!selectedIngredient && !newIngredientValue) || !quantityValue) {
-            alert('Please fill in all required fields');
-            return;
-        }
-
-        // Get the ingredient name
-        let ingredientName = newIngredientValue || ingredientSelect.options[ingredientSelect.selectedIndex].text;
-
-        // Create ingredient element
-        const ingredientDiv = document.createElement('div');
-        ingredientDiv.className = 'flex justify-between items-center p-2 border rounded-lg bg-white';
-
-        ingredientDiv.innerHTML = `
-            <span>${ingredientName} - ${quantityValue} ${unitsValue}</span>
-            <button type="button" class="bg-red-500 text-white px-3 py-1 rounded remove-ingredient">Remove</button>
-            <input type="hidden" name="ingredients[]" value="${selectedIngredient}">
-            <input type="hidden" name="new_ingredients[]" value="${newIngredientValue}">
-            <input type="hidden" name="quantities[]" value="${quantityValue}">
-            <input type="hidden" name="units[]" value="${unitsValue}">
-        `;
-
-        ingredientList.appendChild(ingredientDiv);
-
-        // Reset fields
-        ingredientSelect.value = '';
-        newIngredient.value = '';
-        quantity.value = '';
-        units.value = 'g';
-    });
-
-    // Remove ingredient using event delegation
-    ingredientList.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-ingredient')) {
-            e.target.closest('div').remove();
-        }
-    });
-
-    addInstructionButton.addEventListener('click', function() {
-        const instructionText = instructionInput.value.trim();
-
-        if (!instructionText) {
-            alert('Please enter an instruction');
-            return;
-        }
-
-        // Create instruction element
-        const instructionDiv = document.createElement('div');
-        instructionDiv.className = 'flex justify-between items-start p-2 border rounded-lg bg-white';
-
-        instructionDiv.innerHTML = `
-            <div class="flex-1">
-                <span class="font-medium">Step ${stepCount}:</span>
-                <p class="mt-1">${instructionText}</p>
-                <input type="hidden" name="instructions[]" value="${instructionText}">
+                </div>
             </div>
-            <button type="button" class="bg-red-500 text-white px-3 py-1 rounded ml-4 remove-instruction">Remove</button>
-        `;
 
-        instructionList.appendChild(instructionDiv);
-        stepCount++;
+            <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded">Add Recipe</button>
+        </form>
+    </div>
 
-        // Reset input field
-        instructionInput.value = '';
-    });
+{% endblock %}
 
-    // Remove instruction & update step numbers
-    instructionList.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-instruction')) {
-            e.target.closest('div').remove();
-            stepCount--;
-
-            // Update step numbers
-            const steps = instructionList.querySelectorAll('.font-medium');
-            steps.forEach((step, index) => {
-                step.textContent = `Step ${index + 1}:`;
-            });
-        }
-    });
-});
-</script>
+{% block extra_scripts %}
+    <script src="{% static 'recipe/js/ingredients.js' %}"></script>
+    <script src="{% static 'recipe/js/instructions.js' %}"></script>
+    <script src="{% static 'recipe/js/categories.js' %}"></script>
 {% endblock %}

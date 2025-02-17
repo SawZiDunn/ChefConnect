@@ -1,4 +1,8 @@
 from django.db import models
+from django.conf import settings
+
+
+# settings.Auth_User_Model means CustomerUser I created
 
 
 class Category(models.Model):
@@ -21,9 +25,11 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(help_text="Time in minutes")
     servings = models.PositiveIntegerField()
     food_pic = models.ImageField(upload_to="recipe_pictures/")
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='recipes')
+    categories = models.ManyToManyField(Category, related_name='recipes')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
+                                   related_name='created_recipes')
 
     def __str__(self):
         return self.title
