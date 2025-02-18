@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}{{ recipe.title }}{% endblock %}
 
 {% block content %}
@@ -17,14 +19,15 @@
                 </a>
 
                 <div class="flex items-center gap-4 mt-4">
-                    <a href=""
+                    <a href="{% url 'users:chef-profile' chef_id=recipe.created_by.id %}"
                        class="text-gray-600 hover:text-gray-900 flex items-center gap-2">
-                        {% if recipe.author.profile.profile_pic %}
-                            <img src="{{ recipe.author.profile.profile_pic.url }}" alt="{{ recipe.author.username }}"
+                        {% if recipe.created_by.profile_picture %}
+                            <img src="{{ recipe.created_by.profile_picture.url }}"
+                                 alt="{{ recipe.created_by.username }}"
                                  class="w-8 h-8 rounded-full object-cover">
                         {% else %}
                             <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                <span class="text-sm text-gray-500">{{ recipe.author.username|make_list|first|upper }}</span>
+                                <span class="text-sm text-gray-500">{{ recipe.created_by.username|make_list|first|upper }}</span>
                             </div>
                         {% endif %}
                         <span>{{ recipe.created_by.username }}</span>
@@ -103,6 +106,14 @@
                                 </div>
                             {% endfor %}
                         </div>
+                    </div>
+
+                    {#                like btn#}
+                    <div>
+                        <input type="hidden" value="{{ recipe.id }}" id="recipe_id">
+                        <button id="like-button">
+                            ❤️ Like (<span id="like-count">{{ recipe.likes.count }}</span>)
+                        </button>
                     </div>
                 </div>
             </div>
@@ -238,4 +249,6 @@
             }
         }
     </script>
+
+    <script src="{% static 'recipe/js/like.js' %}"></script>
 {% endblock %}
