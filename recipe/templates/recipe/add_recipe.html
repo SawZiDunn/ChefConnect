@@ -26,33 +26,33 @@
                     </div>
 
                     <div class="flex flex-col">
-                        <label for="category" class="font-medium mb-1">Category</label>
+                        <label for="tag" class="font-medium mb-1">Tag</label>
 
-                        <!-- Dropdown to select existing categories -->
-                        <select id="category-select" name="existing_categories" class="border rounded-lg p-2">
-                            <option value="">Choose category...</option>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
+                        <!-- Dropdown to select existing tags -->
+                        <select id="tag-select" name="existing_tags" class="border rounded-lg p-2">
+                            <option value="">Choose tag...</option>
+                            {% for tag in tags %}
+                                <option value="{{ tag.id }}">{{ tag.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Input field for adding a new category -->
+                    <!-- Input field for adding a new tag -->
                     <div class="flex mt-3">
-                        <input type="text" id="new-category" placeholder="Add new category"
+                        <input type="text" id="new-tag" placeholder="Add new tag"
                                class="border rounded-lg p-2 flex-grow mr-2">
-                        <button type="button" onclick="addNewCategory()"
+                        <button type="button" onclick="addNewTag()"
                                 class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                             Add
                         </button>
                     </div>
 
-                    <!-- Display selected categories -->
-                    <div id="selected-categories" class="flex flex-wrap gap-2 mt-3"></div>
+                    <!-- Display selected tags -->
+                    <div id="selected-tags" class="flex flex-wrap gap-2 mt-3"></div>
 
-                    <!-- Hidden inputs to store selected categories -->
-                    <input type="hidden" name="existing_categories" id="existing-categories-input">
-                    <input type="hidden" name="new_categories" id="new-categories-input">
+                    <!-- Hidden inputs to store selected tags -->
+                    <input type="hidden" name="existing_tags" id="existing-tags-input">
+                    <input type="hidden" name="new_tags" id="new-tags-input">
 
 
                     <div class="flex flex-col">
@@ -198,5 +198,5 @@
 {% block extra_scripts %}
     <script src="{% static 'recipe/js/ingredients.js' %}"></script>
     <script src="{% static 'recipe/js/instructions.js' %}"></script>
-    <script src="{% static 'recipe/js/categories.js' %}"></script>
+    <script src="{% static 'recipe/js/tags.js' %}"></script>
 {% endblock %}

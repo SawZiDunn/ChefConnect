@@ -111,6 +111,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # tell django to use CustomUser Model as User
 AUTH_USER_MODEL = 'users.CustomUser'
 
+# to authenticate user
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# redirect to this route when @login_required is used
+LOGIN_URL = '/users/login/'
+
 # define media url
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

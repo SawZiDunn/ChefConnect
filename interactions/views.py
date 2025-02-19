@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from .models import Like, Comment, Follow, Conversation, ConversationMessage
 from recipe.models import Recipe
@@ -6,7 +6,7 @@ from users.models import CustomUser
 from django.contrib.auth.decorators import login_required
 
 
-@login_required()
+@login_required
 def like_recipe(request, recipe_id: int):
     recipe = Recipe.objects.get(id=recipe_id)
     like = Like.objects.filter(recipe=recipe, user=request.user).first()
@@ -23,19 +23,27 @@ def like_recipe(request, recipe_id: int):
     return JsonResponse({'isLiked': isLiked, 'total_likes': recipe.likes.count()})
 
 
-@login_required()
+@login_required
 def follow_user(request, user_id: int):
-    followed_user = CustomUser.objects.get(id=user_id)
-    isFollowed = Follow.objects.filter(follower=request.usr, followed_user=followed_user).first()
+    if request.method == "POST":
+        profile_user = get_object_or_404(CustomUser, id=user_id)
 
-    if not isFollowed:
-        Follow.objects.create(follower=request.usr, followed_user=followed_user)
-        isFollowed = True
-    else:
-        isFollowed.delete()
-        isFollowed = False
+        following = False
+        if request.user is not profile_user:
+            follow = Follow.objects.filter(follower=request.user, followed_user=profile_user).first()
 
-    return JsonResponse({'isFollowed': isFollowed})
+            if not follow:
+                Follow.objects.create(follower=request.user, followed_user=profile_user)
+                following = True
+            else:
+                follow.delete()
+                following = False
+
+        return JsonResponse({'following': following, 'follower_count': Follow.objects.filter(
+            followed_user=profile_user).count(),
+                             'following_count': Follow.objects.filter(follower=profile_user).count()})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 @login_required()

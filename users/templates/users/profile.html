@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}{{ profile_user.username }}'s Profile{% endblock %}
 
 {% block content %}
@@ -44,21 +44,20 @@
                                 </a>
                             {% else %}
                                 {% if is_following %}
-                                    <form action="" method="POST" class="inline">
-                                        {% csrf_token %}
-                                        <button type="submit"
-                                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
-                                            Unfollow
-                                        </button>
-                                    </form>
+                                    <button id="follow-button"
+                                            onclick="toggleFollow({{ profile_user.id }})"
+
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                                        Unfollow
+                                    </button>
+
                                 {% else %}
-                                    <form action="" method="POST" class="inline">
-                                        {% csrf_token %}
-                                        <button type="submit"
-                                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                            Follow
-                                        </button>
-                                    </form>
+                                    <button id="follow-button"
+                                            onclick="toggleFollow({{ profile_user.id }})"
+                                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                        Follow
+                                    </button>
+
                                 {% endif %}
                             {% endif %}
                         </div>
@@ -146,10 +145,10 @@
 
                         <div class="flex flex-wrap gap-2 mb-4">
 
-                            <!-- Display first 3 categories only -->
-                            {% for category in recipe.categories.all|slice:":3" %}
+                            <!-- Display first 3 tags only -->
+                            {% for category in recipe.tags.all|slice:":3" %}
                                 <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm">
-                                {{ category.name }}
+                                {{ tag.name }}
                                 </span>
                             {% endfor %}
                         </div>
@@ -176,4 +175,8 @@
             {% endfor %}
         </div>
     </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'users/js/follow.js' %}"></script>
 {% endblock %}

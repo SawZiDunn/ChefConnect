@@ -3,7 +3,9 @@ from django.contrib import messages
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from .forms import NutritionalInfoForm
-from .models import RecipeIngredient, Recipe, Ingredient, Instruction, Category, NutritionalInfo
+from django.contrib.auth.decorators import login_required
+from .models import RecipeIngredient, Recipe, Ingredient, Instruction, Tag, NutritionalInfo
+from interactions.models import Like
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,34 +20,40 @@ def recipe_detail(request, recipe_id):
     ingredients = RecipeIngredient.objects.filter(recipe=recipe)
     instructions = Instruction.objects.filter(recipe=recipe)
     nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
-    categories = recipe.categories.all()  # Category.objects.filter(recipe=recipe)
+    tags = recipe.tags.all()  # Tag.objects.filter(recipe=recipe)
+
+    # checks if current user likes this recipe
+    isLiked = Like.objects.filter(user=request.user, recipe=recipe).exists()
+    print("isLike", isLiked)
 
     return render(request, "recipe/detail.html",
                   {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
-                   "nutrition_info": nutrition_info, "categories": categories})
+                   "nutrition_info": nutrition_info, "tags": tags, "like_count": recipe.likes.count(),
+                   "isLiked": isLiked})
 
 
+@login_required
 def add_recipe(request):
     if request.method == "POST":
         nutrition_form = NutritionalInfoForm(request.POST)
 
-        # Process selected categories (existing ones)
-        category_ids = request.POST.get("existing_categories")  # Get selected categories
+        # Process selected tags (existing ones)
+        tag_ids = request.POST.get("existing_tags")  # Get selected tags
 
-        if category_ids:
-            category_ids = category_ids.split(",")
+        if tag_ids:
+            tag_ids = tag_ids.split(",")
 
-        new_category_names = request.POST.get("new_categories")  # Get new categories input
+        new_tag_names = request.POST.get("new_tags")  # Get new tags input
 
-        if new_category_names:
-            new_category_names = new_category_names.split(",")
+        if new_tag_names:
+            new_tag_names = new_tag_names.split(",")
 
-        print(category_ids)
-        print(new_category_names)
+        print(tag_ids)
+        print(new_tag_names)
 
-        # Validate category input
-        if not category_ids and not new_category_names:
-            raise ValidationError("At least one category is required.")
+        # Validate tag input
+        if not tag_ids and not new_tag_names:
+            raise ValidationError("At least one tag is required.")
 
         try:
             with transaction.atomic():
@@ -81,20 +89,20 @@ def add_recipe(request):
                 recipe.full_clean()  # Validate model fields
                 recipe.save()
 
-                # Add selected existing categories
-                for category_id in category_ids:
+                # Add selected existing tags
+                for tag_id in tag_ids:
                     try:
-                        category = Category.objects.get(pk=category_id)
-                        recipe.categories.add(category)
-                    except Category.DoesNotExist:
-                        raise ValidationError(f"Invalid category ID: {category_id}")
+                        tag = Tag.objects.get(pk=tag_id)
+                        recipe.tags.add(tag)
+                    except Tag.DoesNotExist:
+                        raise ValidationError(f"Invalid tag ID: {tag_id}")
 
-                # Add newly created categories
-                for category_name in new_category_names:
-                    category_name = category_name.strip()
-                    if category_name:
-                        category, created = Category.objects.get_or_create(name=category_name)
-                        recipe.categories.add(category)
+                # Add newly created tags
+                for tag_name in new_tag_names:
+                    tag_name = tag_name.strip()
+                    if tag_name:
+                        tag, created = Tag.objects.get_or_create(name=tag_name)
+                        recipe.tags.add(tag)
 
                 messages.success(request, "Recipe added successfully!")
 
@@ -178,7 +186,7 @@ def add_recipe(request):
     context = {
         "nutrition_form": NutritionalInfoForm(),
         "ingredients": Ingredient.objects.all().order_by("name"),
-        "categories": Category.objects.all().order_by("name"),
+        "tags": Tag.objects.all().order_by("name"),
         "form_data": request.POST if request.method == "POST" else None,
     }
 
@@ -190,11 +198,11 @@ def edit(request, recipe_id: int):
     ingredients = RecipeIngredient.objects.filter(recipe=recipe)
     instructions = Instruction.objects.filter(recipe=recipe)
     nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
-    categories = recipe.categories.all()  # Category.objects.filter(recipe=recipe)
+    tags = recipe.tags.all()  # Tag.objects.filter(recipe=recipe)
 
     return render(request, "recipe/edit_recipe.html",
                   {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
-                   "nutrition_info": nutrition_info, "categories": categories})
+                   "nutrition_info": nutrition_info, "tags": tags})
 
 
 def delete(request, recipe_id: int):

@@ -58,13 +58,13 @@
                             </div>
                         </div>
 
-                        <!-- Categories Row -->
+                        <!-- Tags Row -->
                         <div class="flex flex-wrap gap-2 mb-4">
 
-                            <!-- Display first 3 categories only -->
-                            {% for category in recipe.categories.all|slice:":3" %}
+                            <!-- Display first 3 tags only -->
+                            {% for tag in recipe.tags.all|slice:":3" %}
                                 <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm">
-                                {{ category.name }}
+                                {{ tag.name }}
                                 </span>
                             {% endfor %}
                         </div>

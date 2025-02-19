@@ -5,7 +5,7 @@ from django.conf import settings
 # settings.Auth_User_Model means CustomerUser I created
 
 
-class Category(models.Model):
+class Tag(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -25,7 +25,7 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(help_text="Time in minutes")
     servings = models.PositiveIntegerField()
     food_pic = models.ImageField(upload_to="recipe_pictures/")
-    categories = models.ManyToManyField(Category, related_name='recipes')
+    tags = models.ManyToManyField(Tag, related_name='recipes')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
