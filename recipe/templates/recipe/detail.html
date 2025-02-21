@@ -17,10 +17,14 @@
                     </svg>
                     Back to Recipes
                 </a>
+            </nav>
 
-                <div class="flex items-center gap-4 mt-4">
+            <!-- Recipe Meta Info -->
+            <div class="flex items-center justify-between mb-4">
+                <!-- Left: User Info & Follow -->
+                <div class="flex items-center gap-4">
                     <a href="{% url 'users:chef-profile' chef_id=recipe.created_by.id %}"
-                       class="text-gray-600 hover:text-gray-900 flex items-center gap-2">
+                       class="flex items-center gap-2 text-gray-600 hover:text-gray-900">
                         {% if recipe.created_by.profile_picture %}
                             <img src="{{ recipe.created_by.profile_picture.url }}"
                                  alt="{{ recipe.created_by.username }}"
@@ -33,31 +37,76 @@
                         <span>{{ recipe.created_by.username }}</span>
                     </a>
 
-                    {% if user == recipe.created_by %}
-                        <div class="flex gap-2">
-                            <a href="{% url 'recipe:edit' recipe.id %}"
-                               class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                Edit
-                            </a>
-                            <button onclick="confirmDelete()"
-                                    class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700">
-                                Delete
-                            </button>
-                            <form id="deleteForm" action="{% url 'recipe:delete' recipe.id %}" method="POST"
-                                  class="hidden">
-                                {% csrf_token %}
-                            </form>
-                        </div>
+                    {% if user != recipe.created_by %}
+                        <button id="follow-button"
+                                onclick="toggleFollow({{ recipe.created_by.id }})"
+                                class="{% if is_following %}bg-gray-200 text-gray-700{% else %}bg-blue-600 text-white{% endif %} px-3 py-1 rounded-md hover:opacity-80">
+                            {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                        </button>
                     {% endif %}
                 </div>
 
-            </nav>
+                <!-- Right: Recipe Actions -->
+                <div class="flex items-center gap-2">
+                    {% if user == recipe.created_by %}
+                        <a href="{% url 'recipe:edit' recipe.id %}"
+                           class="flex items-center px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
+                            Edit
+                        </a>
+                        <button onclick="confirmDelete()"
+                                class="flex items-center px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Delete
+                        </button>
+                    {% endif %}
+                    <button onclick="saveToggle({{ recipe.id }})" id="save-button"
+                            class="flex items-center px-3 py-1 {% if is_saved %}bg-gray-200 text-gray-700{% else %}bg-green-600 text-white{% endif %} rounded-md hover:opacity-80">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                        {% if recipe.is_saved %}Unsave{% else %}Save{% endif %}
+                    </button>
+                </div>
+            </div>
 
+            <!-- Recipe Stats -->
+            <div class="flex items-center gap-4 mb-4 text-sm text-gray-500">
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Posted {{ recipe.created_at|timesince }} ago
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    {{ avg_rating|floatformat:1 }} ({{ reviews.count }} reviews)
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    <span id="like-count">{{ like_count }}</span>
+                </div>
+            </div>
+
+            {#            recipe overview#}
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Recipe Image -->
                 <div class="rounded-lg overflow-hidden shadow-lg">
                     {% if recipe.food_pic %}
-                        <img src="{{ recipe.food_pic.url }}" alt="{{ recipe.title }}" class="w-full h-96 object-cover">
+                        <img src="{{ recipe.food_pic.url }}" alt="{{ recipe.title }}"
+                             class="w-full h-96 object-cover">
                     {% else %}
                         <div class="w-full h-96 bg-gray-200 flex items-center justify-center">
                             <span class="text-gray-400">No image available</span>
@@ -97,7 +146,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 p-4 rounded-lg inline-block">
+                    <div class="bg-gray-50 p-4 rounded-lg inline-block mb-6">
                         <p class="text-lg font-semibold text-gray-800">Tag</p>
                         <div class="flex flex-wrap gap-2 mt-2">
                             {% for tag in tags %}
@@ -108,22 +157,49 @@
                         </div>
                     </div>
 
-                    {#like btn#}
-                    <div>
-                        {% if isLiked %}
-                            <button id="like-button" onclick="like({{ recipe.id }})" class="bg-red-100 p-4 rounded-lg">
-                                Unlike
-                            </button>
-                        {% else %}
-                            <button id="like-button" onclick="like({{ recipe.id }})" class="bg-blue-100 p-4 rounded-lg">
-                                Like
-                            </button>
+                    <div class="flex gap-4 items-center">
+                        {#like btn#}
+                        <div>
+                            {% if isLiked %}
+                                <button id="like-button" onclick="like({{ recipe.id }})"
+                                        class="bg-red-100 p-4 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                        </svg>
+                                        Unlike
+                                    </div>
+                                </button>
+                            {% else %}
+                                <button id="like-button" onclick="like({{ recipe.id }})"
+                                        class="bg-blue-100 p-4 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                        </svg>
+                                        Like
+                                    </div>
+                                </button>
+                            {% endif %}
+                            <span id="like-count">{{ like_count }}</span>
+                        </div>
 
-                        {% endif %}
-                        <span id="like-count">❤️ {{ like_count }}</span>
+                        {# edit btn #}
+                        <a href="{% url 'recipe:edit' recipe.id %}"
+                           class="bg-blue-100 p-4 rounded-lg hover:bg-blue-200 transition duration-300">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Edit
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
+            {#        div ends for recipe overview#}
         </div>
 
         <!-- Recipe Content -->
@@ -131,11 +207,11 @@
             <!-- Ingredients -->
             <section>
                 <h2 class="text-2xl font-bold mb-4">Ingredients</h2>
-                <ul class="space-y-3">
+                <ul class="space-y-1">
                     {% for ingredient in ingredients %}
-                        <li class="flex items-center bg-white p-3 rounded-lg shadow-sm">
-                            <span class="w-16 font-medium text-gray-700">{{ ingredient.quantity | floatformat:"-1" }} {{ ingredient.units }}</span>
-                            <span class="text-gray-800">of {{ ingredient.ingredient.name }}</span>
+                        <li class="flex items-center bg-white p-2 rounded-lg shadow-sm">
+                            <span class="w-16 font-medium text-gray-700">- {{ ingredient.quantity | floatformat:"-1" }} {{ ingredient.units }}</span>
+                            <span class="text-gray-800">{{ ingredient.ingredient.name }}</span>
                         </li>
                     {% endfor %}
                 </ul>
@@ -184,51 +260,77 @@
 
 
         {% if user.is_authenticated %}
-            <!-- Comment Section -->
+            <!-- Review Section -->
             <section class="mt-12">
-                <h2 class="text-2xl font-bold mb-4">Comments</h2>
+                <h2 class="text-2xl font-bold mb-4">Reviews</h2>
 
-                <!-- Comment Form -->
-                <form action="" method="POST" class="mb-8">
+                <!-- Review Form -->
+                <form action="{% url 'interactions:review_recipe' recipe_id=recipe.id %}" method="POST" class="mb-8">
                     {% csrf_token %}
-                    <div class="flex gap-4">
-                        <div class="flex-grow">
-                            <textarea name="comment" rows="2"
-                                      class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="Add a comment..."></textarea>
+                    <div class="space-y-4">
+                        <!-- Star Rating -->
+                        <div class="flex items-center gap-2">
+                            <label class="text-gray-700">Rating:</label>
+                            <div class="flex gap-1">
+                                {% for i in "12345" %}
+                                    <button type="button"
+                                            onclick="setRating({{ i }})"
+                                            class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"
+                                            data-rating="{{ i }}">
+                                        ★
+                                    </button>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="rating" id="rating-input" value="">
                         </div>
-                        <button type="submit"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 h-fit">
-                            Post
-                        </button>
+
+                        <!-- Review Text -->
+                        <div class="flex gap-4">
+                            <div class="flex-grow">
+                    <textarea name="review-body" rows="2"
+                              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Add a review..."></textarea>
+                            </div>
+                            <button type="submit"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 h-fit">
+                                Post
+                            </button>
+                        </div>
                     </div>
                 </form>
 
-                <!-- Comments List -->
+                <!-- Review List -->
                 <div class="space-y-4">
-                    {% for comment in comments %}
+                    {% for review in reviews %}
                         <div class="bg-white p-4 rounded-lg shadow-sm">
                             <div class="flex justify-between items-start mb-2">
                                 <div class="flex items-center gap-2">
-                                    {% if comment.user.profile.profile_pic %}
-                                        <img src="{{ comment.user.profile.profile_pic.url }}"
-                                             alt="{{ comment.user.username }}"
+                                    {% if review.user.profile.profile_pic %}
+                                        <img src="{{ review.user.profile_picture.url }}"
+                                             alt="{{ review.user.username }}"
                                              class="w-8 h-8 rounded-full object-cover">
                                     {% else %}
                                         <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                            <span class="text-sm text-gray-500">{{ comment.user.username|make_list|first|upper }}</span>
+                                            <span class="text-sm text-gray-500">{{ review.user.username|make_list|first|upper }}</span>
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <a href="{% url 'profile' comment.user.username %}"
+                                        <a href="{% url 'users:chef-profile' review.user.id %}"
                                            class="font-semibold text-gray-900 hover:text-blue-600">
-                                            {{ comment.user.username }}
+                                            {{ review.user.username }}
                                         </a>
-                                        <p class="text-sm text-gray-500">{{ comment.created_at|timesince }} ago</p>
+
+                                        <!-- Display Rating -->
+                                        <div class="flex text-yellow-400 text-sm">
+                                            {% for i in review.get_stars %}
+                                                <span>★</span>
+                                            {% endfor %}
+                                        </div>
+                                        <p class="text-sm text-gray-500">{{ review.created_at|timesince }} ago</p>
                                     </div>
                                 </div>
-                                {% if user == comment.user %}
-                                    <form action="{% url 'recipe:delete_comment' comment.id %}" method="POST"
+                                {% if user == review.user %}
+                                    <form action="{% url 'interactions:delete_review' review.id %}" method="POST"
                                           class="inline">
                                         {% csrf_token %}
                                         <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
@@ -237,16 +339,15 @@
                                     </form>
                                 {% endif %}
                             </div>
-                            <p class="text-gray-700">{{ comment.content }}</p>
+                            <p class="text-gray-700">{{ review.body }}</p>
                         </div>
                     {% empty %}
-                        <p class="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
+                        <p class="text-gray-500 text-center py-4">No reviews yet. Be the first to give review!</p>
                     {% endfor %}
                 </div>
             </section>
         {% endif %}
     </article>
-
 
     <!-- Delete Confirmation Script -->
     <script>
@@ -258,4 +359,7 @@
     </script>
 
     <script src="{% static 'recipe/js/like.js' %}"></script>
+    <script src="{% static 'recipe/js/rating.js' %}"></script>
+    <script src="{% static 'recipe/js/save.js' %}"></script>
+    <script src="{% static 'recipe/js/follow.js' %}"></script>
 {% endblock %}

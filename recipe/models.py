@@ -22,21 +22,29 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    cooking_time = models.PositiveIntegerField(help_text="Time in minutes")
+    preparation_time = models.PositiveIntegerField(help_text="Time in minutes")
     servings = models.PositiveIntegerField()
     food_pic = models.ImageField(upload_to="recipe_pictures/")
     tags = models.ManyToManyField(Tag, related_name='recipes')
+    isSaved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
                                    related_name='created_recipes')
+
+    def get_avg_rating(self):
+        total = 0
+        for review in self.reviews.all():
+            total += review.rating
+        avg_rating = round(total / (len(self.reviews.all()) or 1))
+        return range(avg_rating)
 
     def __str__(self):
         return self.title
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="ingredients")
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.FloatField()
     units = models.CharField(max_length=50, help_text="e.g. grams, cups, tbsp")

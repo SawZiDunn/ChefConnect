@@ -24,39 +24,16 @@ class Follow(models.Model):
     # user.followers.all() → Users who follow this user
 
 
-class Comment(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')
+class Review(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # 1-5 stars
     created_at = models.DateTimeField(auto_now_add=True)
+
     body = models.TextField()
 
-    def __str__(self):
-        return f"{self.user} commented on {self.recipe}"
-
-
-class Conversation(models.Model):
-    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                              related_name='conversations_initiated')
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conversations_received')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user1', 'user2'], name='unique_conversation')
-        ]
+    def get_stars(self):
+        return range(self.rating)
 
     def __str__(self):
-        return f"Conversation between {self.user1} and {self.user2}"
-
-
-class ConversationMessage(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='messages')
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
-    created_at = models.DateTimeField(auto_now_add=True)
-    message = models.TextField()
-
-    class Meta:
-        ordering = ['created_at']
-
-    def __str__(self):
-        return f"{self.user}: {self.message[:50]}..."
+        return f"{self.user} gave a review on {self.recipe}"

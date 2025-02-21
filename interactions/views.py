@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from .models import Like, Comment, Follow, Conversation, ConversationMessage
+from .models import Like, Review, Follow
 from recipe.models import Recipe
 from users.models import CustomUser
 from django.contrib.auth.decorators import login_required
@@ -46,31 +46,21 @@ def follow_user(request, user_id: int):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
-@login_required()
-def comment_recipe(request, recipe_id: int):
+@login_required
+def review_recipe(request, recipe_id: int):
     if request.method == 'POST':
-        body = request.POST.get('body')
+        body = request.POST.get('review-body')
+        rating = request.POST.get('rating');
         recipe = Recipe.objects.get(id=recipe_id)
 
-        Comment.objects.create(recipe=recipe, user=request.user, body=body)
+        Review.objects.create(recipe=recipe, user=request.user, body=body, rating=rating)
 
         return redirect("recipe:detail", recipe_id=recipe_id)
 
 
-@login_required()
-def start_conversation(request, user_id: int):
-    conversation = Conversation.objects.get(user1=request.usr,
-                                            user2=CustomUser.objects.get(id=user_id)) or Conversation.objects.get(
-        user1=CustomUser.objects.get(id=user_id), user2=request.user)
+@login_required
+def delete_review(request, review_id: int):
+    review = Review.objects.get(id=review_id)
+    review.delete()
 
-    if not conversation:
-        Conversation.objects.create(user1=request.user, user2=CustomUser.objects.get(id=user_id))
-        return
-
-    messages = conversation.messages.all()
-
-    return
-    # conversation = Conversation.objects.filter(
-    #     (models.Q(user1=user1) & models.Q(user2=user2)) |
-    #     (models.Q(user1=user2) & models.Q(user2=user1))
-    # ).first()
+    return redirect("recipe:detail", recipe_id=review.recipe.id)

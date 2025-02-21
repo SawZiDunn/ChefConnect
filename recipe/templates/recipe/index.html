@@ -3,14 +3,129 @@
 {% block title %}Recipes{% endblock %}
 
 {% block content %}
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-2">
 
-        <h1 class="text-3xl font-bold mb-8">Explore Recipes</h1>
+        <h1 class="text-2xl font-bold mb-4">Explore Recipes</h1>
+
+
+        <!-- Search and Filter Section -->
+        <div class="bg-white rounded-lg shadow-md px-6 py-4 mb-8">
+            <form method="GET" class="space-y-4">
+                <!-- Search Bar -->
+                <div class="relative">
+                    <input type="text"
+                           name="search"
+                           placeholder="Search recipes..."
+                           value="{{ request.GET.search|default:'' }}"
+                           class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Tag Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+                        <select name="tag"
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Tags</option>
+                            {% for tag in all_tags %}
+                                <option value="{{ tag.id }}"
+                                        {% if tag.id|stringformat:"i" == selected_tag %}selected{% endif %}>
+                                    {{ tag.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Ingredient Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Main Ingredient</label>
+                        <select name="ingredient"
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Ingredients</option>
+                            {% for ingredient in all_ingredients %}
+                                <option value="{{ ingredient.id }}"
+                                        {% if ingredient.id|stringformat:"i" == selected_ingredient %}selected{% endif %}>
+                                    {{ ingredient.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Rating Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Rating</label>
+                        <select name="rating"
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Rating</option>
+                            {% for value, label in rating_choices %}
+                                <option value="{{ value }}"
+                                        {% if value|stringformat:"i" == selected_rating %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Cooking Time Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cooking Time</label>
+                        <select name="cooking_time"
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {% for value, label in cooking_time_choices %}
+                                <option value="{{ value }}"
+                                        {% if value == selected_cooking_time %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end space-x-3">
+                    <a href="{% url 'recipe:index' %}"
+                       class="px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50">
+                        Clear Filters
+                    </a>
+                    <button type="submit"
+                            class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+        <!-- Show active filters if any -->
+        {% if request.GET.tags or request.GET.ingredients or request.GET.search %}
+            <div class="flex flex-wrap gap-2 mb-6">
+                {% if request.GET.search %}
+                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
+                    Search: {{ request.GET.search }}
+                </span>
+                {% endif %}
+                {% for tag in selected_tags %}
+                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
+                    {{ tag.name }}
+                </span>
+                {% endfor %}
+                {% for ingredient in selected_ingredients %}
+                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
+                    {{ ingredient.name }}
+                </span>
+                {% endfor %}
+            </div>
+        {% endif %}
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for recipe in recipes %}
-
                 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <!-- Recipe Image -->
                     {% if recipe.food_pic %}
                         <img src="{{ recipe.food_pic.url }}" alt="{{ recipe.title }}" class="w-full h-48 object-cover">
                     {% else %}
@@ -20,10 +135,51 @@
                     {% endif %}
 
                     <div class="p-4">
+                        <!-- User Info Section -->
+                        <div class="flex items-center gap-3 mb-4">
+                            {% if recipe.created_by.profile_picture %}
+                                <img src="{{ recipe.created_by.profile_picture.url }}"
+                                     alt="{{ recipe.created_by.username }}"
+                                     class="w-8 h-8 rounded-full object-cover">
+                            {% else %}
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-500 text-sm">{{ recipe.user.username|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                            <div class="flex flex-col">
+                                <a href="{% url 'users:chef-profile' chef_id=recipe.created_by.id %}"><span
+                                        class="text-sm font-medium">{{ recipe.created_by.username }}</span></a>
+                                <span class="text-xs text-gray-500">{{ recipe.created_at|timesince }} ago</span>
+                            </div>
+                        </div>
+
+                        <!-- Recipe Title -->
                         <h2 class="text-xl font-semibold mb-2">{{ recipe.title }}</h2>
 
+                        <!-- Rating Section -->
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="flex items-center">
+
+                                {% if recipe.get_avg_rating %}
+                                    <!-- Display Rating -->
+                                    <div class="flex text-yellow-400 text-sm">
+                                        {% for i in recipe.get_avg_rating %}
+                                            <span>★</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-sm text-gray-500">No ratings yet</span>
+                                {% endif %}
+
+                            </div>
+                            <span class="text-gray-300">•</span>
+                            <span class="text-sm text-gray-500">{{ recipe.reviews.count }} reviews</span>
+                        </div>
+
+                        <!-- Description -->
                         <p class="text-gray-600 mb-4 line-clamp-2">{{ recipe.description }}</p>
 
+                        <!-- Stats Row -->
                         <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
                             <div class="flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,27 +204,18 @@
                                 </svg>
                                 <span>{{ recipe.likes.count }}</span>
                             </div>
-
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                </svg>
-                                <span>{{ recipe.comments.count }}</span>
-                            </div>
                         </div>
 
                         <!-- Tags Row -->
                         <div class="flex flex-wrap gap-2 mb-4">
-
-                            <!-- Display first 3 tags only -->
                             {% for tag in recipe.tags.all|slice:":3" %}
                                 <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm">
-                                {{ tag.name }}
-                                </span>
+                            {{ tag.name }}
+                        </span>
                             {% endfor %}
                         </div>
 
+                        <!-- View Recipe Link -->
                         <div class="flex items-center justify-end">
                             <a href="{% url 'recipe:detail' recipe.id %}"
                                class="inline-flex items-center text-blue-600 hover:text-blue-800">
@@ -80,10 +227,7 @@
                             </a>
                         </div>
                     </div>
-
-
                 </div>
-
             {% empty %}
                 <div class="col-span-full text-center py-12">
                     <h3 class="text-xl text-gray-600">No recipes found</h3>

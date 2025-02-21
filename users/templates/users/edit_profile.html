@@ -1,10 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+    <div class="max-w-lg mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Edit Profile</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ field.label }}</label>
+
+                    {% if field.name == 'profile_picture' %}
+                        <div class="mb-4">
+                            {% if user.profile_picture %}
+                                <div class="mb-4">
+                                    <p class="text-sm text-gray-600 mb-2">Current Profile Picture:</p>
+                                    <img src="{{ user.profile_picture.url }}" id="imagePreview"
+                                         alt="Current profile picture"
+                                         class="w-32 h-32 object-cover rounded-lg">
+                                </div>
+                            {% endif %}
+                            {{ field }}
+                            <p class="text-sm text-gray-500 mt-2">Choose a new image to change your profile picture</p>
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="flex gap-4">
+                <button type="submit" class="py-4 px-6 text-white bg-blue-500 hover:bg-blue-600 rounded-xl">
+                    Save Changes
+                </button>
+                <a href="{% url 'users:profile' %}"
+                   class="py-4 px-6 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.querySelector('input[type="file"]');
+            const imagePreview = document.getElementById('imagePreview');
+
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    }
+
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

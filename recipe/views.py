@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from .forms import NutritionalInfoForm
 from django.contrib.auth.decorators import login_required
 from .models import RecipeIngredient, Recipe, Ingredient, Instruction, Tag, NutritionalInfo
+from django.http import JsonResponse
 from interactions.models import Like
 import logging
 
@@ -12,7 +13,38 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    return render(request, "recipe/index.html", {"recipes": Recipe.objects.all()})
+    all_tags = Tag.objects.all().order_by('name')
+    all_ingredients = Ingredient.objects.all().order_by('name')
+
+    recipes = Recipe.objects.all()
+
+    # Apply search filter
+    search_query = request.GET.get('search', '')
+    if search_query:
+        recipes = recipes.filter(title__icontains=search_query)
+
+    # Apply tags filter
+    tags = request.GET.getlist('tags')
+    if tags:
+        recipes = recipes.filter(tags__id__in=tags).distinct()
+
+    # Apply ingredients filter
+    ingredients = request.GET.getlist('ingredients')
+    if ingredients:
+        recipes = recipes.filter(ingredients__id__in=ingredients).distinct()
+
+    selected_tags = Tag.objects.filter(id__in=tags) if tags else []
+    selected_ingredients = Ingredient.objects.filter(id__in=ingredients) if ingredients else []
+
+    context = {
+        'recipes': recipes,
+        'all_tags': all_tags,
+        'all_ingredients': all_ingredients,
+        'selected_tags': selected_tags,
+        'selected_ingredients': selected_ingredients,
+    }
+
+    return render(request, 'recipe/index.html', context)
 
 
 def recipe_detail(request, recipe_id):
@@ -24,11 +56,11 @@ def recipe_detail(request, recipe_id):
 
     # checks if current user likes this recipe
     isLiked = Like.objects.filter(user=request.user, recipe=recipe).exists()
-    print("isLike", isLiked)
 
     return render(request, "recipe/detail.html",
                   {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
-                   "nutrition_info": nutrition_info, "tags": tags, "like_count": recipe.likes.count(),
+                   "nutrition_info": nutrition_info, "tags": tags, "reviews": recipe.reviews.all(),
+                   "like_count": recipe.likes.count(),
                    "isLiked": isLiked})
 
 
@@ -205,7 +237,18 @@ def edit(request, recipe_id: int):
                    "nutrition_info": nutrition_info, "tags": tags})
 
 
+@login_required
 def delete(request, recipe_id: int):
     recipe = Recipe.objects.get(pk=recipe_id)
     recipe.delete()
     return redirect("users:profile")
+
+
+# @login_required
+def save(request, recipe_id: id):
+    recipe = Recipe.objects.get(pk=recipe_id)
+
+    recipe.isSaved = False if recipe.isSaved else True
+    recipe.save()
+
+    return JsonResponse({"isSaved": recipe.isSaved})

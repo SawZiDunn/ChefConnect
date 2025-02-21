@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, PasswordChangeForm
 from .models import CustomUser
 from django import forms
 
@@ -79,3 +79,47 @@ class RegisterForm(CustomUserCreationForm):
         'placeholder': 'Tell us about yourself',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
+
+
+class ProfileEditForm(UserChangeForm):
+    # Remove the password field from the form since we don't want to edit it here
+    password = None
+
+    class Meta:
+        model = CustomUser
+        fields = ("username", "email", "profile_picture", "description")
+
+    username = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Your username',
+        'class': 'w-full py-4 px-6 rounded-xl'
+    }))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={
+        'placeholder': 'Your email address',
+        'class': 'w-full py-4 px-6 rounded-xl'
+    }))
+    profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={
+        'class': 'w-full py-4 px-6 rounded-xl',
+        'id': 'id_profile_picture_input'
+    }))
+    description = forms.CharField(required=False, widget=forms.Textarea(attrs={
+        'placeholder': 'Tell us about yourself',
+        'class': 'w-full py-4 px-6 rounded-xl'
+    }))
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Style the password fields
+        self.fields['old_password'].widget.attrs.update({
+            'class': 'w-full py-4 px-6 rounded-xl',
+            'placeholder': 'Current password'
+        })
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'w-full py-4 px-6 rounded-xl',
+            'placeholder': 'New password'
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'w-full py-4 px-6 rounded-xl',
+            'placeholder': 'Confirm new password'
+        })

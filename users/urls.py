@@ -7,7 +7,8 @@ urlpatterns = [
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
     path('register/', register_view, name="register"),
-    path('profile', profile, name="profile"),
-    path('chef-profile/<int:chef_id>', chef_profile, name="chef-profile"),
-    path('edit-profile/<int:chef_id>', edit_profile, name="edit_profile"),
+    path('profile/', profile, name="profile"),
+    path('chef-profile/<int:chef_id>/', chef_profile, name="chef-profile"),
+    path('profile/edit/', edit_profile, name="edit_profile"),
+    path('profile/password/', change_password, name="change_password"),
 ]

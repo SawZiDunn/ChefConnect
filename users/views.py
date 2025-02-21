@@ -1,9 +1,10 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 
 from interactions.models import Follow
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ProfileEditForm, CustomPasswordChangeForm
 from .models import CustomUser
 
 
@@ -41,8 +42,48 @@ def chef_profile(request, chef_id: int):
 
 
 @login_required
-def edit_profile(request, chef_id: int):
-    pass
+def change_password(request):
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            try:
+                # Save the user first
+                user = form.save()
+
+                # Immediately update the session
+                update_session_auth_hash(request, user)
+
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('users:profile')
+            except Exception as e:
+                # If something goes wrong, log it and revert
+                print(f"Error during password change: {e}")  # For debugging
+                messages.error(request, 'An error occurred while changing your password. Please try again.')
+                return redirect('users:change_password')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = CustomPasswordChangeForm(request.user)
+
+    return render(request, 'users/change_password.html', {
+        'form': form
+    })
+
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('users:profile')  # Redirect to profile page
+    else:
+        form = ProfileEditForm(instance=request.user)
+
+    return render(request, 'users/edit_profile.html', {
+        'form': form
+    })
 
 
 def login_view(request):
