@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Saved Recipes{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl font-bold mb-6">Your Saved Recipes</h1>
+
+        <div class="space-y-4">
+            {% for saved_recipe in saved_recipes %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex flex-row items-center p-4 gap-4">
+                        <!-- Recipe Image -->
+                        <div class="w-32 h-32 flex-shrink-0">
+                            {% if saved_recipe.recipe.food_pic %}
+                                <img src="{{ saved_recipe.recipe.food_pic.url }}"
+                                     alt="{{ saved_recipe.recipe.title }}"
+                                     class="w-full h-full object-cover rounded-lg">
+                            {% else %}
+                                <div class="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm">No image</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Recipe Info -->
+                        <div class="flex-grow">
+                            <!-- User Info -->
+                            <div class="flex items-center gap-3 mb-2">
+                                {% if saved_recipe.recipe.created_by.profile_picture %}
+                                    <img src="{{ saved_recipe.recipe.created_by.profile_picture.url }}"
+                                         alt="{{ saved_recipe.recipe.created_by.username }}"
+                                         class="w-8 h-8 rounded-full object-cover">
+                                {% else %}
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <span class="text-gray-500 text-sm">{{ saved_recipe.recipe.created_by.username|first|upper }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium">{{ saved_recipe.recipe.created_by.username }}</span>
+                                    <span class="text-xs text-gray-500">{{ saved_recipe.recipe.created_at|timesince }} ago</span>
+                                </div>
+                            </div>
+
+                            <!-- Title and Stats -->
+                            <h2 class="text-lg font-semibold mb-2">{{ saved_recipe.recipe.title }}</h2>
+
+                            <div class="flex items-center gap-4 text-sm text-gray-500">
+                                <!-- Rating -->
+                                <div class="flex items-center gap-1">
+                                    {% if saved_recipe.recipe.get_avg_rating %}
+                                        <div class="flex text-yellow-400">
+                                            {% for i in saved_recipe.recipe.get_avg_rating %}
+                                                <span>★</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <span>No ratings</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Reviews Count -->
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                    </svg>
+                                    <span>{{ saved_recipe.recipe.reviews.count }}</span>
+                                </div>
+
+                                <!-- Likes Count -->
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                    </svg>
+                                    <span>{{ saved_recipe.recipe.likes.count }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col gap-2">
+                            <a href="{% url 'recipe:detail' saved_recipe.recipe.id %}"
+                               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm text-center">
+                                View Recipe
+                            </a>
+                            <form method="POST" action="{% url 'recipe:unsave-recipe' saved_recipe.recipe.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 text-sm w-full">
+                                    Unsave
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-12">
+                    <h3 class="text-xl text-gray-600">No saved recipes</h3>
+                    <p class="mt-2 text-gray-500">Start saving some recipes!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -12,4 +12,5 @@ urlpatterns = [
     path('recipe/edit/<int:recipe_id>/', edit, name="edit"),
     path('recipe/delete/<int:recipe_id>/', delete, name="delete"),
     path('recipe/save/<int:recipe_id>/', save, name="save"),
+    path('recipe/saved/', saved_recipe, name="saved_recipe")
 ]

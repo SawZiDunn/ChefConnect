@@ -27,24 +27,45 @@
                     </div>
 
                     <div class="flex flex-col">
-                        <label for="category" class="font-medium mb-1">Category</label>
-                        <select id="category-select" name="existing_categories" class="border rounded-lg p-2">
-                            <option value="">Choose category...</option>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}"
-                                        {% if category in categories %}selected{% endif %}>{{ category.name }}</option>
+                        <label for="tag" class="font-medium mb-1">Tag</label>
+
+                        <!-- Dropdown to select existing tags -->
+                        <select id="tag-select" name="existing_tags" class="border rounded-lg p-2">
+                            <option value="">Choose tag...</option>
+                            {% for tag in all_tags %}
+                                <option value="{{ tag.id }}">{{ tag.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Display selected categories -->
-                    <div id="selected-categories" class="flex flex-wrap gap-2 mt-3"></div>
-                    <input type="hidden" name="existing_categories" id="existing-categories-input">
-                    <input type="hidden" name="new_categories" id="new-categories-input">
+                    <!-- Input field for adding a new tag -->
+                    <div class="flex mt-3">
+                        <input type="text" id="new-tag" placeholder="Add new tag"
+                               class="border rounded-lg p-2 flex-grow mr-2">
+                        <button type="button" onclick="addNewTag()"
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            Add
+                        </button>
+                    </div>
+
+                    <!-- Display selected tags -->
+                    <div id="selected-tags" class="flex flex-wrap gap-2 mt-3">
+                        {% for tag in existing_tags %}
+                            <span class="px-3 py-1 bg-gray-300 rounded-lg flex items-center space-x-2">
+                                <span>{{ tag.name }}</span>
+                                <button type="button" class="text-red-600 font-bold ml-2"
+                                        onclick="removeTag(`${{ tag.id }}`)">&times;</button>
+    </span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Hidden inputs to store selected tags -->
+                    <input type="hidden" name="existing_tags" id="existing-tags-input">
+                    <input type="hidden" name="new_tags" id="new-tags-input">
 
                     <div class="flex flex-col">
-                        <label for="cooking_time" class="font-medium mb-1">Cooking Time (minutes)</label>
-                        <input type="number" name="cooking_time" id="cooking_time" value="{{ recipe.cooking_time }}"
+                        <label for="cooking_time" class="font-medium mb-1">Preparation Time (minutes)</label>
+                        <input type="number" name="cooking_time" id="cooking_time" value="{{ recipe.preparation_time }}"
                                class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     </div>
 

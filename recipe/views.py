@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .models import RecipeIngredient, Recipe, Ingredient, Instruction, Tag, NutritionalInfo
 from django.http import JsonResponse
 from interactions.models import Like
+from django.db.models import Avg
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,22 @@ def index(request):
     all_tags = Tag.objects.all().order_by('name')
     all_ingredients = Ingredient.objects.all().order_by('name')
 
-    recipes = Recipe.objects.all()
+    # no need to use all()
+    recipes = Recipe.objects.annotate(
+        rating=Avg('reviews__rating')  # Now matches the property name
+    )
+
+    rating = request.GET.get('rating')
+    if rating:
+        # rating -> rating >=
+        recipes = recipes.filter(rating__gte=rating)
+
+    preparation_time = request.GET.get('preparation_time')
+    if preparation_time:
+        if preparation_time == '61':
+            recipes = recipes.filter(preparation_time__gte=60)
+        else:
+            recipes = recipes.filter(preparation_time__lte=int(preparation_time))
 
     # Apply search filter
     search_query = request.GET.get('search', '')
@@ -24,24 +40,43 @@ def index(request):
         recipes = recipes.filter(title__icontains=search_query)
 
     # Apply tags filter
-    tags = request.GET.getlist('tags')
-    if tags:
-        recipes = recipes.filter(tags__id__in=tags).distinct()
+    tag = request.GET.get('tag')
+    if tag:
+        recipes = recipes.filter(tags__id=tag).distinct()
 
     # Apply ingredients filter
-    ingredients = request.GET.getlist('ingredients')
-    if ingredients:
-        recipes = recipes.filter(ingredients__id__in=ingredients).distinct()
+    ingredient = request.GET.get('ingredient')
+    if ingredient:
+        # recipe -> recipe_ingredient -> ingredient -> id
+        recipes = recipes.filter(ingredients__ingredient__id=ingredient).distinct()
 
-    selected_tags = Tag.objects.filter(id__in=tags) if tags else []
-    selected_ingredients = Ingredient.objects.filter(id__in=ingredients) if ingredients else []
+    rating_choices = [
+        (1, '★'),
+        (2, '★★'),
+        (3, '★★★'),
+        (4, '★★★★'),
+        (5, '★★★★★'),
+    ]
 
+    preparation_time_choices = [
+        (20, 'Less than 20 minutes'),
+        (40, 'Less than 40 minutes'),
+        (60, 'Less than 1 hour'),
+        (61, 'More than 1 hour'),
+    ]
+
+    print("prepar", preparation_time)
     context = {
-        'recipes': recipes,
+        'recipes': recipes.distinct(),  # to remove duplicates from tag and ingredient filters
         'all_tags': all_tags,
         'all_ingredients': all_ingredients,
-        'selected_tags': selected_tags,
-        'selected_ingredients': selected_ingredients,
+        'selected_tag': tag,
+        'selected_ingredient': ingredient,
+        'rating_choices': rating_choices,
+        'selected_rating': rating,
+        'preparation_time_choices': preparation_time_choices,
+        'selected_preparation_time': preparation_time,
+        'search_query': search_query,
     }
 
     return render(request, 'recipe/index.html', context)
@@ -230,11 +265,12 @@ def edit(request, recipe_id: int):
     ingredients = RecipeIngredient.objects.filter(recipe=recipe)
     instructions = Instruction.objects.filter(recipe=recipe)
     nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
-    tags = recipe.tags.all()  # Tag.objects.filter(recipe=recipe)
+    existing_tags = recipe.tags.all()  # Tag.objects.filter(recipe=recipe)
+    all_tags = Tag.objects.all()
 
     return render(request, "recipe/edit_recipe.html",
                   {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
-                   "nutrition_info": nutrition_info, "tags": tags})
+                   "nutrition_info": nutrition_info, "all_tags": all_tags, "existing_tags": existing_tags})
 
 
 @login_required
@@ -246,9 +282,31 @@ def delete(request, recipe_id: int):
 
 # @login_required
 def save(request, recipe_id: id):
-    recipe = Recipe.objects.get(pk=recipe_id)
+    if request.method == "POST":
+        recipe = Recipe.objects.get(pk=recipe_id)
 
-    recipe.isSaved = False if recipe.isSaved else True
-    recipe.save()
+        user = recipe.saved_by.all().filter(id=request.user.id).first()
+        if user:
+            recipe.saved_by.remove(user)
+            isSaved = False
+        else:
+            recipe.saved_by.add(request.user)
+            isSaved = True
 
-    return JsonResponse({"isSaved": recipe.isSaved})
+        return JsonResponse({"isSaved": isSaved})
+
+
+@login_required
+def saved_recipe(request):
+    # no need to use all()
+    recipes = Recipe.objects.filter(isSaved=True)
+
+    rating_choices = [
+        (1, '★'),
+        (2, '★★'),
+        (3, '★★★'),
+        (4, '★★★★'),
+        (5, '★★★★★'),
+    ]
+
+    return render(request, 'recipe/saved_recipe.html', {"recipes": recipes})

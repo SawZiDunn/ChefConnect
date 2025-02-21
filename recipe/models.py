@@ -26,11 +26,11 @@ class Recipe(models.Model):
     servings = models.PositiveIntegerField()
     food_pic = models.ImageField(upload_to="recipe_pictures/")
     tags = models.ManyToManyField(Tag, related_name='recipes')
-    isSaved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
                                    related_name='created_recipes')
+    saved_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='saved_recipes', blank=True, null=True)
 
     def get_avg_rating(self):
         total = 0
