@@ -67,12 +67,8 @@
                         </button>
                     {% endif %}
                     <button onclick="saveToggle({{ recipe.id }})" id="save-button"
-                            class="flex items-center px-3 py-1 {% if is_saved %}bg-gray-200 text-gray-700{% else %}bg-green-600 text-white{% endif %} rounded-md hover:opacity-80">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-                        </svg>
-                        {% if recipe.is_saved %}Unsave{% else %}Save{% endif %}
+                            class="flex items-center px-3 py-1 {% if is_saved %}bg-gray-300 text-gray-700{% else %}bg-green-600 text-white{% endif %} rounded-md hover:opacity-80">
+                        {% if is_saved %}Unsave{% else %}Save{% endif %}
                     </button>
                 </div>
             </div>
@@ -128,7 +124,7 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm">Prep Time</p>
-                                    <p class="font-semibold">{{ recipe.cooking_time }} mins</p>
+                                    <p class="font-semibold">{{ recipe.preparation_time }} mins</p>
                                 </div>
                             </div>
                         </div>
@@ -223,10 +219,12 @@
                 <ol class="space-y-4">
                     {% for instruction in instructions %}
                         <li class="flex">
-                    <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mr-3">
+                            <div class="flex items-center">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mr-3">
                         {{ instruction.step_no }}
                     </span>
-                            <p class="text-gray-700 mt-1">{{ instruction.instruction }}</p>
+                                <p class="text-gray-700 mt-1">{{ instruction.instruction }}</p>
+                            </div>
                         </li>
                     {% endfor %}
                 </ol>
@@ -238,19 +236,19 @@
             <section class="mt-12">
                 <h2 class="text-2xl font-bold mb-4">Nutritional Information</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="bg-white p-4 rounded-lg shadow-sm hover:bg-gray-200">
                         <p class="text-sm text-gray-600">Calories</p>
                         <p class="text-xl font-semibold">{{ nutrition_info.calories }} kcal</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="bg-white p-4 rounded-lg shadow-sm hover:bg-gray-200">
                         <p class="text-sm text-gray-600">Protein</p>
                         <p class="text-xl font-semibold">{{ nutrition_info.protein }} g</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="bg-white p-4 rounded-lg shadow-sm hover:bg-gray-200">
                         <p class="text-sm text-gray-600">Carbohydrates</p>
                         <p class="text-xl font-semibold">{{ nutrition_info.carb }} g</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="bg-white p-4 rounded-lg shadow-sm hover:bg-gray-200">
                         <p class="text-sm text-gray-600">Fat</p>
                         <p class="text-xl font-semibold">{{ nutrition_info.fat }} g</p>
                     </div>
@@ -261,7 +259,7 @@
 
         {% if user.is_authenticated %}
             <!-- Review Section -->
-            <section class="mt-12">
+            <section class="mt-10">
                 <h2 class="text-2xl font-bold mb-4">Reviews</h2>
 
                 <!-- Review Form -->

@@ -26,42 +26,49 @@
                                   class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">{{ recipe.description }}</textarea>
                     </div>
 
-                    <div class="flex flex-col">
-                        <label for="tag" class="font-medium mb-1">Tag</label>
+                    <!-- Tag Manager Component -->
+                    <div class="space-y-4">
+                        <!-- Existing Tags Dropdown -->
+                        <div class="flex flex-col">
+                            <label for="tag-select" class="font-medium mb-1">Tag</label>
+                            <select id="tag-select" name="existing_tags" class="border rounded-lg p-2">
+                                <option value="">Choose tag...</option>
+                                {% for tag in all_tags %}
+                                    <option value="{{ tag.id }}">{{ tag.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                        <!-- Dropdown to select existing tags -->
-                        <select id="tag-select" name="existing_tags" class="border rounded-lg p-2">
-                            <option value="">Choose tag...</option>
-                            {% for tag in all_tags %}
-                                <option value="{{ tag.id }}">{{ tag.name }}</option>
+                        <!-- New Tag Input -->
+                        <div class="flex">
+                            <input type="text"
+                                   id="new-tag"
+                                   placeholder="Add new tag"
+                                   class="border rounded-lg p-2 flex-grow mr-2">
+                            <button type="button"
+                                    onclick="tagManager.addNewTag()"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                Add
+                            </button>
+                        </div>
+
+                        <!-- Selected Tags Display -->
+                        <div id="selected-tags" class="flex flex-wrap gap-2">
+                            {% for tag in existing_tags %}
+                                <span class="px-3 py-1 bg-gray-300 rounded-lg flex items-center"
+                                      data-tag-id="{{ tag.id }}">
+                <span>{{ tag.name }}</span>
+                <button type="button"
+                        class="text-red-600 font-bold ml-2"
+                        onclick="tagManager.removeTag('{{ tag.id }}')">&times;</button>
+            </span>
                             {% endfor %}
-                        </select>
-                    </div>
+                        </div>
 
-                    <!-- Input field for adding a new tag -->
-                    <div class="flex mt-3">
-                        <input type="text" id="new-tag" placeholder="Add new tag"
-                               class="border rounded-lg p-2 flex-grow mr-2">
-                        <button type="button" onclick="addNewTag()"
-                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                            Add
-                        </button>
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" name="existing_tags" id="existing-tags-input">
+                        <input type="hidden" name="new_tags" id="new-tags-input">
                     </div>
-
-                    <!-- Display selected tags -->
-                    <div id="selected-tags" class="flex flex-wrap gap-2 mt-3">
-                        {% for tag in existing_tags %}
-                            <span class="px-3 py-1 bg-gray-300 rounded-lg flex items-center space-x-2">
-                                <span>{{ tag.name }}</span>
-                                <button type="button" class="text-red-600 font-bold ml-2"
-                                        onclick="removeTag(`${{ tag.id }}`)">&times;</button>
-    </span>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Hidden inputs to store selected tags -->
-                    <input type="hidden" name="existing_tags" id="existing-tags-input">
-                    <input type="hidden" name="new_tags" id="new-tags-input">
 
                     <div class="flex flex-col">
                         <label for="cooking_time" class="font-medium mb-1">Preparation Time (minutes)</label>
@@ -80,77 +87,37 @@
                         <input type="file" name="food_pic" id="image" accept="image/*"
                                class="border rounded-lg p-2">
                         {% if recipe.food_pic %}
-                            <img src="{{ recipe.food_pic.url }}" alt="Recipe Image" class="mt-4 w-32 h-32 object-cover">
+                            <img src="{{ recipe.food_pic.url }}" alt="Recipe Image" id="imagePreview"
+                                 class="mt-4 w-32 h-32 object-cover">
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <!-- Same for ingredients and instructions, pre-populating the selected ones -->
-
-            <div class="p-4 border rounded-lg bg-gray-50">
-                <h2 class="text-xl font-semibold mb-4">Ingredients</h2>
-                <div class="ingredient-form space-y-2 p-2 border rounded-lg bg-white mb-4">
-                    <!-- Pre-populate selected ingredients -->
-                    {% for ingredient in recipe.ingredients.all %}
-                        <div class="ingredient-item">
-                            <p>{{ ingredient.name }}</p>
-                            <button type="button" onclick="removeIngredient('{{ ingredient.id }}')">Remove</button>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Add ingredient form (same as add recipe) -->
-                <button type="button" id="add-ingredient" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-                    Add Ingredient
-                </button>
-            </div>
-
-            <div class="p-4 border rounded-lg bg-gray-50">
-                <h2 class="text-xl font-semibold mb-4">Instructions</h2>
-                <div class="instruction-form p-2 border rounded-lg bg-white mb-4">
-                    <textarea id="instruction-input" rows="2"
-                              class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-
-                <div id="instruction-list" class="space-y-2">
-                    <!-- Pre-populate instructions -->
-                    {% for instruction in recipe.instructions.all %}
-                        <div class="instruction-item">
-                            <p>Step {{ forloop.counter }}: {{ instruction.text }}</p>
-                            <button type="button" onclick="removeInstruction('{{ instruction.id }}')">Remove</button>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <button type="button" id="add-instruction" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-                    Add Step
-                </button>
-            </div>
 
             <div class="p-4 border rounded-lg bg-gray-50">
                 <h2 class="text-xl font-semibold mb-4">Nutritional Info</h2>
                 <div class="flex flex-row">
                     <div class="flex flex-col">
                         <label>Protein</label>
-                        <input type="number" name="protein" value="{{ nutritional_info.protein }}">
+                        <input type="number" name="protein" value="{{ nutrition_info.protein }}">
                     </div>
 
                     <div class="flex flex-col">
                         <label>Carb</label>
-                        <input type="number" name="carb" value="{{ nutritional_info.carb }}">
+                        <input type="number" name="carb" value="{{ nutrition_info.carb }}">
                     </div>
                 </div>
 
                 <div class="flex flex-row">
                     <div class="flex flex-col">
                         <label>Fat</label>
-                        <input type="number" name="fat" value="{{ nutritional_info.fat }}">
+                        <input type="number" name="fat" value="{{ nutrition_info.fat }}">
                     </div>
 
                     <div class="flex flex-col">
                         <label>Calories</label>
-                        <input type="number" name="calories" value="{{ nutritional_info.calories }}">
+                        <input type="number" name="calories" value="{{ nutrition_info.calories }}">
                     </div>
                 </div>
             </div>
@@ -158,6 +125,27 @@
             <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded">Save Changes</button>
         </form>
     </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.querySelector('input[type="file"]');
+            const imagePreview = document.getElementById('imagePreview');
+
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    }
+
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        });
+    </script>
 
 {% endblock %}
 

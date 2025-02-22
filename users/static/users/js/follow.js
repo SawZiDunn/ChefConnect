@@ -5,8 +5,9 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
-function toggleFollow(userId) {
-    const followButton = document.getElementById("follow-button");
+function toggleFollow(userId, buttonElement) {
+    // get follow-btn if buttonElement is not passed
+    const followButton = buttonElement || document.getElementById("follow-button");
 
     if (!followButton) return;
 
@@ -21,7 +22,7 @@ function toggleFollow(userId) {
         .then(data => {
             if (data.following) {
                 followButton.textContent = "Unfollow";
-                followButton.className = "px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300";
+                followButton.className = "px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-400";
 
 
                 console.log("followers", data.follower_count);
@@ -31,8 +32,6 @@ function toggleFollow(userId) {
                 followButton.className = "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
 
 
-                console.log("followers", data.follower_count);
-                console.log("followings", data.following_count);
             }
 
             document.getElementById('follower_count').textContent = data.follower_count;

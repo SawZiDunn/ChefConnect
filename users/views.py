@@ -86,6 +86,15 @@ def edit_profile(request):
     })
 
 
+@login_required
+def following_users(request):
+    user = CustomUser.objects.get(pk=request.user.id)
+
+    return render(request, 'users/following.html', {
+        "following_users": user.followings.all(),
+    })
+
+
 def login_view(request):
     if request.method == "POST":
         form = LoginForm(request=request, data=request.POST)  # Add request parameter

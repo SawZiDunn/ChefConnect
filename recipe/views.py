@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import transaction
 from django.core.exceptions import ValidationError
+
+from users.models import CustomUser
 from .forms import NutritionalInfoForm
 from django.contrib.auth.decorators import login_required
 from .models import RecipeIngredient, Recipe, Ingredient, Instruction, Tag, NutritionalInfo
@@ -92,11 +94,15 @@ def recipe_detail(request, recipe_id):
     # checks if current user likes this recipe
     isLiked = Like.objects.filter(user=request.user, recipe=recipe).exists()
 
+    user = recipe.saved_by.all().filter(id=request.user.id).first()
+
+    isSaved = True if user else False
+
     return render(request, "recipe/detail.html",
                   {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
                    "nutrition_info": nutrition_info, "tags": tags, "reviews": recipe.reviews.all(),
                    "like_count": recipe.likes.count(),
-                   "isLiked": isLiked})
+                   "isLiked": isLiked, "is_saved": isSaved})
 
 
 @login_required
@@ -128,7 +134,7 @@ def add_recipe(request):
                 recipe_data = {
                     "title": request.POST.get("title"),
                     "description": request.POST.get("description"),
-                    "cooking_time": request.POST.get("cooking_time"),
+                    "preparation_time": request.POST.get("preparation_time"),
                     "servings": request.POST.get("servings"),
                     "created_by": request.user
                 }
@@ -139,7 +145,7 @@ def add_recipe(request):
                         raise ValidationError(f"{field.replace('_', ' ').title()} is required.")
 
                 # Check required numeric fields
-                for field in ["cooking_time", "servings"]:
+                for field in ["preparation_time", "servings"]:
                     try:
                         value = float(recipe_data[field])
                         if value <= 0:
@@ -286,6 +292,7 @@ def save(request, recipe_id: id):
         recipe = Recipe.objects.get(pk=recipe_id)
 
         user = recipe.saved_by.all().filter(id=request.user.id).first()
+
         if user:
             recipe.saved_by.remove(user)
             isSaved = False
@@ -299,7 +306,8 @@ def save(request, recipe_id: id):
 @login_required
 def saved_recipe(request):
     # no need to use all()
-    recipes = Recipe.objects.filter(isSaved=True)
+    user = CustomUser.objects.get(pk=request.user.id)
+    recipes = user.saved_recipes.all()
 
     rating_choices = [
         (1, '★'),
@@ -309,4 +317,4 @@ def saved_recipe(request):
         (5, '★★★★★'),
     ]
 
-    return render(request, 'recipe/saved_recipe.html', {"recipes": recipes})
+    return render(request, 'recipe/saved_recipe.html', {"saved_recipes": recipes})

@@ -55,22 +55,13 @@
                                     Change Password
                                 </a>
                             {% else %}
-                                {% if is_following %}
-                                    <button id="follow-button"
-                                            onclick="toggleFollow({{ profile_user.id }})"
 
-                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
-                                        Unfollow
-                                    </button>
+                                <button id="follow-button"
+                                        onclick="toggleFollow({{ profile_user.id }})"
+                                        class="px-4 py-2 {% if is_following %}bg-gray-200 text-gray-700 hover:bg-gray-400 {% else %}bg-blue-600 text-white hover:bg-blue-700 {% endif %}rounded-md ">
+                                    {% if is_following %} Unfollow {% else %} Follow {% endif %}
+                                </button>
 
-                                {% else %}
-                                    <button id="follow-button"
-                                            onclick="toggleFollow({{ profile_user.id }})"
-                                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                        Follow
-                                    </button>
-
-                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
