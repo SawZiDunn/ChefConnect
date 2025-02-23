@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Recipe Ingredients{% endblock %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Edit Recipe Ingredients</h1>
+
+        <form method="POST" action="{% url 'recipe:edit_ingredients' recipe_id=recipe.id %}" id="ingredient-form">
+            {% csrf_token %}
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="space-y-4">
+                    <!-- Ingredient Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="ingredient-select" class="block text-sm font-medium text-gray-700 mb-1">
+                                Select Ingredient
+                            </label>
+                            <select id="ingredient-select" class="w-full border rounded-md p-2">
+                                <option value="">Choose an ingredient</option>
+                                {% for ingredient in ingredients %}
+                                    <option value="{{ ingredient.id }}"
+                                            data-unit="{{ ingredient.unit }}">{{ ingredient.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="new-ingredient" class="block text-sm font-medium text-gray-700 mb-1">
+                                Or Add New Ingredient
+                            </label>
+                            <input type="text" id="new-ingredient"
+                                   class="w-full border rounded-md p-2"
+                                   placeholder="Enter new ingredient">
+                        </div>
+                    </div>
+
+                    <!-- Quantity and Units -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                                Quantity
+                            </label>
+                            <input type="number" id="quantity"
+                                   class="w-full border rounded-md p-2"
+                                   placeholder="Enter quantity">
+                        </div>
+
+                        <div>
+                            <label for="units" class="block text-sm font-medium text-gray-700 mb-1">
+                                Units
+                            </label>
+                            <select id="units" class="w-full border rounded-md p-2">
+                                {% for unit in ingredient_units %}
+                                    <option value="{{ unit.0 }}">{{ unit.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="button" id="add-ingredient"
+                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Add Ingredient
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ingredient List -->
+                <div class="mt-6">
+                    <h2 class="text-lg font-semibold mb-3">Recipe Ingredients</h2>
+                    <div id="selected-ingredients" class="space-y-2">
+                        {% if recipe_ingredients %}
+                            {% for ingredient in recipe_ingredients %}
+                                <div class="flex justify-between items-center p-2 border rounded-lg bg-white"
+                                     data-ingredient-id="{{ ingredient.ingredient.id }}">
+                                    <span>{{ ingredient.ingredient.name }} - {{ ingredient.quantity }} {{ ingredient.get_unit_display }}</span>
+                                    <button type="button"
+                                            class="bg-red-500 text-white px-3 py-1 rounded remove-ingredient">
+                                        Remove
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Hidden inputs for form submission -->
+                <input type="hidden" id="existing-ingredients-input" name="existing_ingredients" value="">
+                <input type="hidden" id="new-ingredients-input" name="new_ingredients" value="">
+                <input type="hidden" id="quantities-input" name="quantities" value="">
+                <input type="hidden" id="units-input" name="units" value="">
+
+                <div class="mt-6 flex justify-end space-x-4">
+                    <a href="{% url 'recipe:detail' recipe.id %}"
+                       class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'recipe/js/editIngredients.js' %}"></script>
+{% endblock %}

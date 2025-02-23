@@ -1,4 +1,4 @@
-const tagManager = (() => {
+tagManager = (() => {
     // Private variables
     let existingTags = [];
     let newTags = [];

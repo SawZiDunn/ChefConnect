@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 
 
-# settings.Auth_User_Model means CustomerUser I created
+# settings.Auth_User_Model means CustomUser I created
 
 
 class Tag(models.Model):
@@ -30,7 +30,7 @@ class Recipe(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
                                    related_name='created_recipes')
-    saved_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='saved_recipes', blank=True, null=True)
+    saved_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='saved_recipes', blank=True)
 
     def get_avg_rating(self):
         total = 0
@@ -47,10 +47,10 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="ingredients")
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.FloatField()
-    units = models.CharField(max_length=50, help_text="e.g. grams, cups, tbsp")
+    unit = models.CharField(max_length=50, help_text="e.g. grams, cups, tbsp")
 
     def __str__(self):
-        return f"{self.quantity} {self.units} of {self.ingredient.name}"
+        return f"{self.quantity} {self.unit} of {self.ingredient.name}"
 
 
 class Instruction(models.Model):

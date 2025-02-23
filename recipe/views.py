@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
+import recipe
 from users.models import CustomUser
 from .forms import NutritionalInfoForm
 from django.contrib.auth.decorators import login_required
@@ -256,6 +257,7 @@ def add_recipe(request):
             messages.error(request, "An unexpected error occurred. Please try again.")
 
     # GET request or form validation failure
+
     context = {
         "nutrition_form": NutritionalInfoForm(),
         "ingredients": Ingredient.objects.all().order_by("name"),
@@ -266,17 +268,205 @@ def add_recipe(request):
     return render(request, "recipe/add_recipe.html", context)
 
 
-def edit(request, recipe_id: int):
-    recipe = Recipe.objects.get(pk=recipe_id)
-    ingredients = RecipeIngredient.objects.filter(recipe=recipe)
-    instructions = Instruction.objects.filter(recipe=recipe)
-    nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
-    existing_tags = recipe.tags.all()  # Tag.objects.filter(recipe=recipe)
-    all_tags = Tag.objects.all()
+def edit_recipe(request, recipe_id: int):
+    nutrition_info = NutritionalInfo.objects.get(pk=recipe_id)
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
 
-    return render(request, "recipe/edit_recipe.html",
-                  {"recipe": recipe, "ingredients": ingredients, "instructions": instructions,
-                   "nutrition_info": nutrition_info, "all_tags": all_tags, "existing_tags": existing_tags})
+    # Check if user has permission to edit
+    if recipe.created_by != request.user:
+        messages.error(request, "You don't have permission to edit this recipe")
+        return redirect('recipe:detail', recipe_id=recipe_id)
+
+    if request.method == "POST":
+        nutrition_form = NutritionalInfoForm(request.POST, instance=recipe.nutrition_info)
+
+        # Get tag data
+        tag_ids = request.POST.get("existing_tags", "").split(",") if request.POST.get("existing_tags") else []
+        new_tag_names = request.POST.get("new_tags", "").split(",") if request.POST.get("new_tags") else []
+
+        try:
+            with transaction.atomic():
+                # Update basic recipe fields
+                recipe.title = request.POST.get("title")
+                recipe.description = request.POST.get("description")
+                recipe.preparation_time = request.POST.get("cooking_time")  # Changed to match template
+                recipe.servings = request.POST.get("servings")
+
+                # Handle food pic update if provided
+                if "food_pic" in request.FILES:
+                    recipe.food_pic = request.FILES["food_pic"]
+
+                # Validate required fields
+                if not all([recipe.title, recipe.description]):
+                    raise ValidationError("Title and description are required.")
+
+                # Validate numeric fields
+                for field, value in [("preparation_time", recipe.preparation_time),
+                                     ("servings", recipe.servings)]:
+                    try:
+                        float_value = float(value)
+                        if float_value <= 0:
+                            raise ValueError
+                    except (ValueError, TypeError):
+                        raise ValidationError(f"Invalid value for {field.replace('_', ' ')}")
+
+                recipe.full_clean()
+                recipe.save()
+
+                # Update tags
+                recipe.tags.clear()  # Remove existing tags
+
+                # Add selected existing tags
+                for tag_id in tag_ids:
+                    if tag_id.strip():
+                        try:
+                            tag = Tag.objects.get(pk=tag_id)
+                            recipe.tags.add(tag)
+                        except Tag.DoesNotExist:
+                            raise ValidationError(f"Invalid tag ID: {tag_id}")
+
+                # Add new tags
+                for tag_name in new_tag_names:
+                    tag_name = tag_name.strip()
+                    if tag_name:
+                        tag, created = Tag.objects.get_or_create(name=tag_name)
+                        recipe.tags.add(tag)
+
+                # Update nutritional information directly since you're not using a form
+                nutrition_info = recipe.nutrition_info
+                nutrition_info.protein = request.POST.get("protein")
+                nutrition_info.carb = request.POST.get("carb")
+                nutrition_info.fat = request.POST.get("fat")
+                nutrition_info.calories = request.POST.get("calories")
+
+                try:
+                    nutrition_info.full_clean()
+                    nutrition_info.save()
+                except ValidationError as e:
+                    raise ValidationError(f"Invalid nutritional information: {str(e)}")
+
+                messages.success(request, "Recipe updated successfully!")
+                return redirect('recipe:detail', recipe_id=recipe_id)
+
+        except ValidationError as e:
+            messages.error(request, str(e))
+            print(str(e))
+
+        except Exception as e:
+            logger.exception("Error updating recipe")
+            messages.error(request, "An unexpected error occurred. Please try again.")
+
+    # GET request or form validation failure
+
+    ingredient_units = [
+        ("g", "grams"),
+        ("ml", "milliliters"),
+        ("tsp", "teaspoons"),
+        ("tbsp", "tablespoons"),
+        ("cup", "cups"),
+        ("piece", "pieces"),
+
+    ]
+
+    context = {
+        "recipe": recipe,
+        "nutrition_info": nutrition_info,
+        "all_tags": Tag.objects.all().order_by("name"),
+        "existing_tags": recipe.tags.all(),
+        "ingredient_units": ingredient_units,
+    }
+
+    return render(request, "recipe/edit_recipe.html", context)
+
+
+def edit_ingredients(request, recipe_id: int):
+    recipe = Recipe.objects.get(pk=recipe_id)
+    if request.method == "POST":
+        print("submitted")
+
+        existing_ingredients = request.POST.get('existing_ingredients', '').split(',')
+        new_ingredients = request.POST.get('new_ingredients', '').split(',')
+        quantities = request.POST.get('quantities', '').split(',')
+        units = request.POST.get('units', '').split(',')
+
+        # delet all ingredients of this recipe first
+        RecipeIngredient.objects.filter(recipe=recipe).delete()
+
+        # Process existing ingredients
+        for i, ingredient_id in enumerate(existing_ingredients):
+            if ingredient_id:
+                RecipeIngredient.objects.create(
+                    recipe=recipe,
+                    ingredient_id=ingredient_id,
+                    quantity=quantities[i],
+                    unit=units[i]
+                )
+
+        # Process new ingredients
+        for i, ingredient_name in enumerate(new_ingredients):
+            if ingredient_name:
+                # Create new ingredient
+                ingredient = Ingredient.objects.create(name=ingredient_name)
+                # Add to recipe
+                RecipeIngredient.objects.create(
+                    recipe=recipe,
+                    ingredient=ingredient,
+                    quantity=quantities[i + len(existing_ingredients)],
+                    unit=units[i + len(existing_ingredients)]
+                )
+
+        return redirect('recipe:detail', recipe_id=recipe_id)
+
+    ingredient_units = [
+        ("g", "grams"),
+        ("ml", "milliliters"),
+        ("tsp", "teaspoons"),
+        ("tbsp", "tablespoons"),
+        ("cup", "cups"),
+        ("piece", "pieces"),
+
+    ]
+
+    print(RecipeIngredient.objects.filter(recipe=recipe))
+
+    return render(request, "recipe/edit_ingredients.html",
+                  {"recipe": recipe, "ingredients": Ingredient.objects.all().order_by("name"),
+                   "ingredient_units": ingredient_units,
+                   "recipe_ingredients": RecipeIngredient.objects.filter(recipe=recipe)})
+
+
+def edit_instructions(request, recipe_id: int):
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+
+                # Process instructions
+                instructions = [inst.strip() for inst in request.POST.getlist("instructions[]") if inst.strip()]
+
+                if not instructions:
+                    raise ValidationError("At least one instruction is required.")
+
+                recipe_instructions = [
+                    Instruction(recipe=recipe, step_no=index + 1, instruction=instruction_text)
+                    for index, instruction_text in enumerate(instructions)
+                ]
+
+                if recipe_instructions:
+                    Instruction.objects.bulk_create(recipe_instructions)
+
+                messages.success(request, "Recipe added successfully!")
+                return redirect("recipe:index")
+
+        except ValidationError as e:
+            messages.error(request, str(e))
+            print(str(e))
+
+        except Exception as e:
+            logger.exception("Error creating recipe")
+            messages.error(request, "An unexpected error occurred. Please try again.")
+
+    return render(request, "recipe/edit_instructions.html",
+                  {"instructions": Instruction.objects.filter(recipe=Recipe.objects.get(pk=recipe_id)).all()})
 
 
 @login_required

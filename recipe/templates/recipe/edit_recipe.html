@@ -3,7 +3,7 @@
 {% block title %}Edit Recipe{% endblock %}
 {% block content %}
 
-    <div class="container mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
+    <div class="container mx-auto mt-3 p-3 bg-white shadow-lg rounded-lg">
         <h1 class="text-2xl font-bold mb-6">Edit Recipe</h1>
 
         <form method="post" action="{% url 'recipe:edit' recipe.id %}" enctype="multipart/form-data"
@@ -57,10 +57,10 @@
                             {% for tag in existing_tags %}
                                 <span class="px-3 py-1 bg-gray-300 rounded-lg flex items-center"
                                       data-tag-id="{{ tag.id }}">
-                <span>{{ tag.name }}</span>
-                <button type="button"
-                        class="text-red-600 font-bold ml-2"
-                        onclick="tagManager.removeTag('{{ tag.id }}')">&times;</button>
+                                    <span>{{ tag.name }}</span>
+                            <button type="button"
+                                    class="text-red-600 font-bold ml-2"
+                                    onclick="tagManager.removeTag('{{ tag.id }}')">&times;</button>
             </span>
                             {% endfor %}
                         </div>
@@ -150,7 +150,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <script src="{% static 'recipe/js/ingredients.js' %}"></script>
-    <script src="{% static 'recipe/js/instructions.js' %}"></script>
-    <script src="{% static 'recipe/js/tags.js' %}"></script>
+    <script src="{% static 'recipe/js/editTags.js' %}"></script>
 {% endblock %}
