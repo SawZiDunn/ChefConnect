@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-
+from django.template.defaultfilters import capfirst  # for capitalization in html
 from interactions.models import Follow
 from .forms import LoginForm, RegisterForm, ProfileEditForm, CustomPasswordChangeForm
 from .models import CustomUser

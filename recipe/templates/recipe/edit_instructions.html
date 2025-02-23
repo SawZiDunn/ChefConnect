@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Recipe Instructions{% endblock %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Edit Recipe Instructions</h1>
+
+        <form method="POST" id="instruction-form">
+            {% csrf_token %}
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <!-- Instruction input -->
+                <div class="mb-6">
+                    <div class="p-4 border rounded-lg bg-gray-50">
+                        <h2 class="text-xl font-semibold mb-4">Instructions</h2>
+
+                        <!-- Instruction input form -->
+                        <div class="instruction-form p-2 border rounded-lg bg-white mb-4">
+                            <div class="flex flex-col">
+                                <label class="font-medium mb-1">Step</label>
+                                <textarea id="instruction-input" rows="2"
+                                          class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                                          placeholder="Enter instruction step"></textarea>
+                            </div>
+                            <button type="button" id="add-instruction"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+                                Add Step
+                            </button>
+                        </div>
+
+                        <!-- List of instructions -->
+                        <div id="instruction-list" class="space-y-2">
+                            {% for instruction in recipe_instructions %}
+                                <div class="instruction-item flex items-start space-x-4 p-2 border rounded-lg bg-white">
+                                    <span class="instruction-number font-semibold min-w-[2rem]">{{ instruction.step_no }}.</span>
+                                    <p class="instruction-text flex-grow">{{ instruction.instruction }}</p>
+                                    <div class="flex space-x-2">
+                                        <button type="button" class="move-up text-gray-600 hover:text-gray-900 px-2">↑
+                                        </button>
+                                        <button type="button" class="move-down text-gray-600 hover:text-gray-900 px-2">
+                                            ↓
+                                        </button>
+                                        <button type="button"
+                                                class="remove-instruction text-red-500 hover:text-red-700">×
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden input for instructions -->
+                <input type="hidden" id="instructions-input" name="instructions" value="">
+
+                <!-- Form buttons -->
+                <div class="mt-6 flex justify-end space-x-4">
+                    <a href="{% url 'recipe:detail' recipe.id %}"
+                       class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'recipe/js/editInstructions.js' %}"></script>
+{% endblock %}

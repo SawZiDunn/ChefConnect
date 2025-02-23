@@ -4,60 +4,71 @@
 {% block title %}Following Users{% endblock %}
 
 {% block content %}
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-2xl font-bold mb-6">People You Follow</h1>
+    <div class="container mx-auto px-4 py-4 sm:py-6">
+        <h1 class="text-xl sm:text-2xl font-bold mb-4">People You Follow</h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {% for follow in following_users %}
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex items-center space-x-4">
+                <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                         <!-- Profile Picture -->
                         {% if follow.followed_user.profile_picture %}
                             <img src="{{ follow.followed_user.profile_picture.url }}"
                                  alt="{{ follow.followed_user.username }}'s profile"
-                                 class="w-8 h-8 rounded-full object-cover">
+                                 class="w-12 h-12 sm:w-8 sm:h-8 rounded-full object-cover">
                         {% else %}
-                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                <span class="text-sm text-gray-500">{{ follow.followed_user.username|make_list|first|upper }}</span>
+                            <div class="w-12 h-12 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                <span class="text-base sm:text-sm text-gray-500">{{ follow.followed_user.username|make_list|first|upper }}</span>
                             </div>
                         {% endif %}
 
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             <!-- User Name -->
-                            <h2 class="text-xl font-semibold">
+                            <h2 class="text-lg sm:text-xl font-semibold truncate">
                                 <a href="{% url 'users:chef-profile' follow.followed_user.id %}"
-                                   class="hover:text-blue-600">
-                                    {{ follow.followed_user.username }}
+                                   class="hover:text-blue-600 text-base">
+                                    {{ follow.followed_user.username | capfirst }}
                                 </a>
                             </h2>
 
-                            <!-- Recipe Count -->
-                            <p class="text-gray-600">
-                                {{ follow.followed_user.created_recipes.count }} recipes
-                            </p>
+                            <!-- Stats Container -->
+                            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-1 sm:space-y-0 mt-1">
+                                <!-- Recipe Count -->
+                                <p class="text-gray-600 text-xs">
+                                    <span>{{ follow.followed_user.created_recipes.count }}</span>
+                                    {% if follow.followed_user.created_recipes.count == 1 %}recipe{% else %}
+                                        recipes{% endif %}
+                                </p>
+
+                                <!-- Followers -->
+                                <p class="text-gray-600 text-xs" id="follower-count-{{ follow.followed_user.id }}">
+                                    {{ follow.followed_user.followers.count }}
+                                    {% if follow.followed_user.followers.count == 1 %}follower{% else %}
+                                        followers{% endif %}
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Follow Button -->
-                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-400"
+                        <button class="w-full sm:w-auto mt-3 sm:mt-0 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-md hover:bg-gray-400 transition-colors duration-200"
                                 id="follow-button"
                                 data-user-id="{{ follow.followed_user.id }}"
-
-                                onclick="{toggleFollow({{ follow.followed_user.id }}, this)}">
+                                onclick="{FollowingToggleFollow({{ follow.followed_user.id }}, this)}">
                             Unfollow
                         </button>
                     </div>
                 </div>
             {% empty %}
-                <div class="col-span-full text-center py-8">
+                <div class="col-span-full text-center py-6 sm:py-8">
                     <p class="text-gray-500">You're not following anyone yet.</p>
-                    <a href="{% url 'explore_users' %}" class="text-blue-600 hover:underline mt-2 inline-block">
-                        Discover people to follow
+                    <a href="{% url 'recipe:index' %}"
+                       class="text-blue-600 hover:underline mt-2 inline-block">
+                        Explore Recipes
                     </a>
                 </div>
             {% endfor %}
         </div>
     </div>
-
 {% endblock %}
 
 {% block extra_scripts %}

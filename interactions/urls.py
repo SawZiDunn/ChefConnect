@@ -4,8 +4,10 @@ from . import views
 app_name = 'interactions'
 
 urlpatterns = [
-    path('like/<int:recipe_id>/', views.like_recipe, name='like_recipe'),
-    path('follow/<int:user_id>/', views.follow_user, name='follow_user'),
-    path('review/<int:recipe_id>/', views.review_recipe, name='review_recipe'),
-    path('review/delete/<int:review_id>/', views.delete_review, name='delete_review'),
+
+    path("recipe/<int:recipe_id>/like/", views.like_recipe, name="like_recipe"),
+    path("user/<int:user_id>/follow/", views.follow_user, name="follow_user"),
+
+    path("recipe/<int:recipe_id>/review/", views.review_recipe, name="review_recipe"),
+    path("review/<int:review_id>/delete/", views.delete_review, name="delete_review"),
 ]

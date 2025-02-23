@@ -4,17 +4,27 @@
 
 {% block content %}
     <div class="container mx-auto px-4 py-2">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl
+                {% if message.tags == 'success' %}bg-green-100 text-green-700{% endif %}
+                {% if message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
         <h1 class="text-2xl font-bold mb-4">Explore Recipes</h1>
 
 
         <!-- Search and Filter Section -->
-        <div class="bg-white rounded-lg shadow-md px-6 py-2 mb-8 text-sm">
+        <div class="bg-white rounded-lg shadow-md px-6 py-2 mb-8 text-xs">
             <form method="GET" class="space-y-4">
                 <!-- Search Bar -->
                 <div class="relative">
                     <input type="text"
                            name="search"
+                           aria-label="Search recipes"
                            placeholder="Search recipes..."
                            value="{{ request.GET.search|default:'' }}"
                            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -123,6 +133,7 @@
             </div>
         {% endif %}
 
+        <!-- recipe display section-->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for recipe in recipes %}
                 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -135,9 +146,9 @@
                         </div>
                     {% endif %}
 
-                    <div class="p-4">
+                    <div class="p-2">
                         <!-- User Info Section -->
-                        <div class="flex items-center gap-3 mb-4">
+                        <div class="flex items-center gap-3 mb-2">
                             {% if recipe.created_by.profile_picture %}
                                 <img src="{{ recipe.created_by.profile_picture.url }}"
                                      alt="{{ recipe.created_by.username }}"
@@ -149,16 +160,16 @@
                             {% endif %}
                             <div class="flex flex-col">
                                 <a href="{% url 'users:chef-profile' chef_id=recipe.created_by.id %}"><span
-                                        class="text-sm font-medium">{{ recipe.created_by.username }}</span></a>
+                                        class="text-sm font-medium hover:text-blue-500">{{ recipe.created_by.username | capfirst }}</span></a>
                                 <span class="text-xs text-gray-500">{{ recipe.created_at|timesince }} ago</span>
                             </div>
                         </div>
 
                         <!-- Recipe Title -->
-                        <h2 class="text-xl font-semibold mb-2">{{ recipe.title }}</h2>
+                        <h2 class="text-lg font-semibold mb-1 hover:text-blue-500">{{ recipe.title }}</h2>
 
                         <!-- Rating Section -->
-                        <div class="flex items-center gap-2 mb-3">
+                        <div class="flex items-center gap-2 mb-3 text-sm">
                             <div class="flex items-center">
 
                                 {% if recipe.get_avg_rating %}
@@ -169,20 +180,20 @@
                                         {% endfor %}
                                     </div>
                                 {% else %}
-                                    <span class="text-sm text-gray-500">No ratings yet</span>
+                                    <span class="text-sm text-gray-500 hover:text-blue-500">No ratings yet</span>
                                 {% endif %}
 
                             </div>
                             <span class="text-gray-300">•</span>
-                            <span class="text-sm text-gray-500">{{ recipe.reviews.count }} reviews</span>
+                            <span class="text-sm text-gray-500 hover:text-blue-500">{{ recipe.reviews.count }} reviews</span>
                         </div>
 
                         <!-- Description -->
-                        <p class="text-gray-600 mb-4 line-clamp-2">{{ recipe.description }}</p>
+                        <p class="text-gray-600 mb-4 line-clamp-2 text-sm hover:text-blue-500">{{ recipe.description }}</p>
 
                         <!-- Stats Row -->
-                        <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                            <div class="flex items-center">
+                        <div class="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                            <div class="flex items-center hover:text-blue-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -190,7 +201,7 @@
                                 <span>{{ recipe.preparation_time }} mins</span>
                             </div>
 
-                            <div class="flex items-center">
+                            <div class="flex items-center hover:text-blue-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -198,7 +209,7 @@
                                 <span>{{ recipe.servings }} servings</span>
                             </div>
 
-                            <div class="flex items-center">
+                            <div class="flex items-center hover:text-blue-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
@@ -210,7 +221,7 @@
                         <!-- Tags Row -->
                         <div class="flex flex-wrap gap-2 mb-4">
                             {% for tag in recipe.tags.all|slice:":3" %}
-                                <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm">
+                                <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm hover:bg-gray-200">
                             {{ tag.name }}
                         </span>
                             {% endfor %}

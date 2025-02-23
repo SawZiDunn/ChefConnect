@@ -10,7 +10,7 @@ function toggleFollow(userId) {
 
     if (!followButton) return;
 
-    fetch(`/interactions/follow/${userId}/`, {  // URL should match your Django view
+    fetch(`/interactions/user/${userId}/follow/`, {  // URL should match your Django view
         method: "POST",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"), // CSRF token for Django security

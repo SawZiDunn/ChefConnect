@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
 from django.core.exceptions import ValidationError
-
-import recipe
+import json
+from django.template.defaultfilters import capfirst  # for capitalization in html
 from users.models import CustomUser
 from .forms import NutritionalInfoForm
 from django.contrib.auth.decorators import login_required
@@ -435,38 +435,33 @@ def edit_ingredients(request, recipe_id: int):
                    "recipe_ingredients": RecipeIngredient.objects.filter(recipe=recipe)})
 
 
-def edit_instructions(request, recipe_id: int):
+def edit_instructions(request, recipe_id):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+
     if request.method == "POST":
-        try:
-            with transaction.atomic():
+        instructions_json = request.POST.get('instructions', '[]')
+        instructions = json.loads(instructions_json)
 
-                # Process instructions
-                instructions = [inst.strip() for inst in request.POST.getlist("instructions[]") if inst.strip()]
+        # Clear existing instructions
+        Instruction.objects.filter(recipe=recipe).delete()
 
-                if not instructions:
-                    raise ValidationError("At least one instruction is required.")
+        # Create new instructions
+        for index, text in enumerate(instructions, 1):
+            if text.strip():  # Only create if text is not empty
+                Instruction.objects.create(
+                    recipe=recipe,
+                    step_no=index,
+                    instruction=text
+                )
 
-                recipe_instructions = [
-                    Instruction(recipe=recipe, step_no=index + 1, instruction=instruction_text)
-                    for index, instruction_text in enumerate(instructions)
-                ]
+        return redirect('recipe:detail', recipe_id=recipe.id)
 
-                if recipe_instructions:
-                    Instruction.objects.bulk_create(recipe_instructions)
+    context = {
+        'recipe': recipe,
+        'recipe_instructions': recipe.instructions.all().order_by('step_no')
+    }
 
-                messages.success(request, "Recipe added successfully!")
-                return redirect("recipe:index")
-
-        except ValidationError as e:
-            messages.error(request, str(e))
-            print(str(e))
-
-        except Exception as e:
-            logger.exception("Error creating recipe")
-            messages.error(request, "An unexpected error occurred. Please try again.")
-
-    return render(request, "recipe/edit_instructions.html",
-                  {"instructions": Instruction.objects.filter(recipe=Recipe.objects.get(pk=recipe_id)).all()})
+    return render(request, 'recipe/edit_instructions.html', context)
 
 
 @login_required

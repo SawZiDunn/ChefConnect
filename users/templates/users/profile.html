@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{{ profile_user.username }}'s Profile{% endblock %}
+{% block title %}{{ profile_user.username | capfirst }}'s Profile{% endblock %}
 
 {% block content %}
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-2">
 
         {% if messages %}
             {% for message in messages %}
@@ -16,17 +16,18 @@
         {% endif %}
 
         <!-- Profile Header -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Left Column - Profile Picture -->
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-4">
+            <div class="flex flex-col md:grid md:grid-cols-3 gap-6">
+                <!-- Profile Picture - Centered on mobile -->
                 <div class="flex justify-center">
                     {% if profile_user.profile_picture %}
                         <img src="{{ profile_user.profile_picture.url }}"
                              alt="{{ profile_user.username }}"
-                             class="w-48 h-48 rounded-full object-cover border-4 border-gray-200">
+                             class="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-200">
                     {% else %}
-                        <div class="w-48 h-48 rounded-full bg-gray-200 flex items-center justify-center">
-                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gray-200 flex items-center justify-center">
+                            <svg class="w-16 h-16 md:w-24 md:h-24 text-gray-400" fill="none" stroke="currentColor"
+                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
@@ -34,45 +35,42 @@
                     {% endif %}
                 </div>
 
-                <!-- Middle Column - User Info -->
+                <!-- User Info - Full width on mobile -->
                 <div class="md:col-span-2">
-                    <div class="flex justify-between items-start mb-4">
-
-                        <div>
-                            <h1 class="text-2xl font-bold">{{ profile_user.username }}</h1>
-
+                    <!-- Username and Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 sm:gap-0 mb-4">
+                        <div class="text-center sm:text-left">
+                            <h1 class="text-2xl font-bold">{{ profile_user.username | capfirst }}</h1>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="space-x-2">
+                        <!-- Action Buttons - Stack on mobile -->
+                        <div class="flex flex-col sm:flex-row gap-2 sm:space-x-2">
                             {% if request.user == profile_user %}
                                 <a href="{% url 'users:edit_profile' %}"
-                                   class="inline-block px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                                   class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
                                     Edit Profile
                                 </a>
                                 <a href="{% url 'users:change_password' %}"
-                                   class="inline-block px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                                   class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
                                     Change Password
                                 </a>
                             {% else %}
-
                                 <button id="follow-button"
-                                        onclick="toggleFollow({{ profile_user.id }})"
-                                        class="px-4 py-2 {% if is_following %}bg-gray-200 text-gray-700 hover:bg-gray-400 {% else %}bg-blue-600 text-white hover:bg-blue-700 {% endif %}rounded-md ">
-                                    {% if is_following %} Unfollow {% else %} Follow {% endif %}
+                                        onclick="ProfileToggleFollow({{ profile_user.id }})"
+                                        class="w-full sm:w-auto px-4 py-2 {% if is_following %}bg-gray-200 text-gray-700 hover:bg-gray-400{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %} rounded-md">
+                                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
                                 </button>
-
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Bio -->
+                    <!-- description - Center on mobile -->
                     {% if profile_user.description %}
-                        <p class="text-gray-600 mb-4">{{ profile_user.description }}</p>
+                        <p class="text-gray-600 mb-4 text-center sm:text-left">{{ profile_user.description }}</p>
                     {% endif %}
 
-                    <!-- Stats -->
-                    <div class="flex space-x-6">
+                    <!-- Stats - Better spacing on mobile -->
+                    <div class="flex justify-center sm:justify-start space-x-6">
                         <div class="text-center">
                             <span class="block font-bold text-xl">{{ recipe_count }}</span>
                             <span class="text-gray-600">Recipes</span>
@@ -92,8 +90,9 @@
 
 
         <!-- Recipes Section -->
-        <h2 class="text-2xl font-bold mb-4">{{ profile_user.username }}'s Recipes</h2>
+        <h2 class="text-2xl font-bold mb-4">{{ profile_user.username | capfirst }}'s Recipes</h2>
 
+        <!-- recipe display section-->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for recipe in recipes %}
                 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -106,9 +105,9 @@
                         </div>
                     {% endif %}
 
-                    <div class="p-4">
+                    <div class="p-2">
                         <!-- User Info Section -->
-                        <div class="flex items-center gap-3 mb-3">
+                        <div class="flex items-center gap-3 mb-2">
                             {% if recipe.created_by.profile_picture %}
                                 <img src="{{ recipe.created_by.profile_picture.url }}"
                                      alt="{{ recipe.created_by.username }}"
@@ -120,16 +119,16 @@
                             {% endif %}
                             <div class="flex flex-col">
                                 <a href="{% url 'users:chef-profile' chef_id=recipe.created_by.id %}"><span
-                                        class="text-sm font-medium">{{ recipe.created_by.username }}</span></a>
+                                        class="text-sm font-medium hover:text-blue-500">{{ recipe.created_by.username | capfirst }}</span></a>
                                 <span class="text-xs text-gray-500">{{ recipe.created_at|timesince }} ago</span>
                             </div>
                         </div>
 
                         <!-- Recipe Title -->
-                        <h2 class="text-xl font-semibold mb-1">{{ recipe.title }}</h2>
+                        <h2 class="text-lg font-semibold mb-1 hover:text-blue-500">{{ recipe.title }}</h2>
 
                         <!-- Rating Section -->
-                        <div class="flex items-center gap-2 mb-2">
+                        <div class="flex items-center gap-2 mb-3 text-sm">
                             <div class="flex items-center">
 
                                 {% if recipe.get_avg_rating %}
@@ -140,20 +139,20 @@
                                         {% endfor %}
                                     </div>
                                 {% else %}
-                                    <span class="text-sm text-gray-500">No ratings yet</span>
+                                    <span class="text-sm text-gray-500 hover:text-blue-500">No ratings yet</span>
                                 {% endif %}
 
                             </div>
                             <span class="text-gray-300">•</span>
-                            <span class="text-sm text-gray-500">{{ recipe.reviews.count }} reviews</span>
+                            <span class="text-sm text-gray-500 hover:text-blue-500">{{ recipe.reviews.count }} reviews</span>
                         </div>
 
                         <!-- Description -->
-                        <p class="text-gray-600 mb-3 line-clamp-2">{{ recipe.description }}</p>
+                        <p class="text-gray-600 mb-4 line-clamp-2 text-sm hover:text-blue-500">{{ recipe.description }}</p>
 
                         <!-- Stats Row -->
-                        <div class="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                            <div class="flex items-center">
+                        <div class="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                            <div class="flex items-center hover:text-blue-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -161,7 +160,7 @@
                                 <span>{{ recipe.preparation_time }} mins</span>
                             </div>
 
-                            <div class="flex items-center">
+                            <div class="flex items-center hover:text-blue-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -169,7 +168,7 @@
                                 <span>{{ recipe.servings }} servings</span>
                             </div>
 
-                            <div class="flex items-center">
+                            <div class="flex items-center hover:text-blue-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
@@ -179,9 +178,9 @@
                         </div>
 
                         <!-- Tags Row -->
-                        <div class="flex flex-wrap gap-2 mb-2">
+                        <div class="flex flex-wrap gap-2 mb-4">
                             {% for tag in recipe.tags.all|slice:":3" %}
-                                <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm">
+                                <span class="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-sm hover:bg-gray-200">
                             {{ tag.name }}
                         </span>
                             {% endfor %}

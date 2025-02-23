@@ -10,7 +10,7 @@ async function like(recipeId) {
 
 
     try {
-        const response = await fetch(`/interactions/like/${recipeId}/`, {
+        const response = await fetch(`/interactions/recipe/${recipeId}/like/`, {
             method: "POST",
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"), // CSRF token for Django security

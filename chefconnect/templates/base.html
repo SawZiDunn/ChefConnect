@@ -1,5 +1,4 @@
 {% load static %}
-
 <!doctype html>
 
 <html>
@@ -8,56 +7,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="https://cdn.tailwindcss.com"></script>
-
-    {% block extra_heads %}{% endblock %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heroicons/1.0.6/solid.min.js"></script>
 
     <title>{% block title %}{% endblock %} | ChefConnect</title>
 </head>
 
 <body>
-<nav class="py-3 px-6 flex justify-between items-center border-b border-gray-200">
-    <a href="/" class="text-xl font-semibold">ChefConnect</a>
+<nav class="relative py-3 px-4 md:px-6 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto">
+        <!-- Desktop & Mobile Header -->
+        <div class="flex justify-between items-center">
+            <a href="/" class="text-xl font-semibold">ChefConnect</a>
 
-    <div class="space-x-6 flex items-center">
-        <a href="{% url 'recipe:add_recipe' %}" class="text-base font-semibold hover:text-gray-500">New Recipe</a>
-    <a href="{% url 'users:following' %}" class="text-base font-semibold hover:text-gray-500">Following</a>
-        <a href="{% url 'recipe:saved_recipe' %}" class="text-base font-semibold hover:text-gray-500">Favourites</a>
+    {#            menu btn for mobile#}
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
 
-        {% if request.user.is_authenticated %}
+            <!-- nav for desktop -->
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="{% url 'recipe:add_recipe' %}" class="text-base font-semibold hover:text-gray-500">New Recipe</a>
+                <a href="{% url 'users:following' %}" class="text-base font-semibold hover:text-gray-500">Following</a>
+                <a href="{% url 'recipe:saved_recipes' %}" class="text-base font-semibold hover:text-gray-500">Favourites</a>
 
-            <!-- User Profile Section -->
-            <a href="{% url 'users:profile' %}">
-                <div class="flex items-center space-x-2">
+                {% if request.user.is_authenticated %}
+                    <!-- User Profile Section -->
+                    <a href="{% url 'users:profile' %}" class="flex items-center space-x-2">
+                        {% if request.user.profile_picture %}
+                            <img src="{{ request.user.profile_picture.url }}" alt="Profile"
+                                 class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="text-gray-600">{{ request.user.username|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                        <span class="text-base font-semibold hover:text-gray-500">{{ request.user.username }}</span>
+                    </a>
 
-                    {% if request.user.profile_picture %}
-                        <img src="{{ request.user.profile_picture.url }}" alt="Profile"
-                             class="w-8 h-8 rounded-full object-cover">
-                    {% else %}
-                        <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span class="text-gray-600">{{ request.user.username|first|upper }}</span>
-                        </div>
-                    {% endif %}
-                    <span class="ml-2 text-base font-semibold hover:text-gray-500">{{ request.user.username }}</span>
-                </div>
-            </a>
+                    <a href="{% url 'users:logout' %}"
+                       class="text-base font-semibold hover:text-red-700">Logout</a>
+                {% else %}
+                    <a href="{% url 'users:register' %}"
+                       class="px-4 py-2 text-base font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Sign up</a>
+                    <a href="{% url 'users:login' %}"
+                       class="px-4 py-2 text-base font-semibold bg-gray-500 text-white rounded-xl hover:bg-gray-700">Log in</a>
+                {% endif %}
+            </div>
+        </div>
 
-            <a href="{% url 'users:logout' %}"
-               class="text-base font-semibold hover:text-red-700">Logout</a>
-        {% else %}
-            <a href="{% url 'users:register' %}"
-               class="px-4 py-2 text-base font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Sign up</a>
-            <a href="{% url 'users:login' %}"
-               class="px-4 py-2 text-base font-semibold bg-gray-500 text-white rounded-xl hover:bg-gray-700">Log in</a>
-        {% endif %}
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
+            <div class="flex flex-col space-y-4">
+                <a href="{% url 'recipe:add_recipe' %}" class="text-base font-semibold hover:text-gray-500">New Recipe</a>
+                <a href="{% url 'users:following' %}" class="text-base font-semibold hover:text-gray-500">Following</a>
+                <a href="{% url 'recipe:saved_recipes' %}" class="text-base font-semibold hover:text-gray-500">Favourites</a>
+
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'users:profile' %}" class="flex items-center space-x-2">
+                        {% if request.user.profile_picture %}
+                            <img src="{{ request.user.profile_picture.url }}" alt="Profile"
+                                 class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="text-gray-600">{{ request.user.username|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                        <span class="text-base font-semibold hover:text-gray-500">{{ request.user.username }}</span>
+                    </a>
+
+                    <a href="{% url 'users:logout' %}"
+                       class="text-base font-semibold hover:text-red-700">Logout</a>
+                {% else %}
+                    <div class="flex flex-col space-y-2">
+                        <a href="{% url 'users:register' %}"
+                           class="px-4 py-2 text-base font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700 text-center">Sign up</a>
+                        <a href="{% url 'users:login' %}"
+                           class="px-4 py-2 text-base font-semibold bg-gray-500 text-white rounded-xl hover:bg-gray-700 text-center">Log in</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    
     </div>
 </nav>
 
-<div class="px-6 py-6">
-        
+<div class="px-4 md:px-6 py-6">
+
     {% block content %}
     {% endblock %}
 </div>
 
+
+
 {% block extra_scripts %}{% endblock %}
+<script>
+    // menu toggle for mobile responsive
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+</script>
 </body>
 </html>

@@ -10,7 +10,7 @@ function saveToggle(recipeId, btnElement) {
 
     if (!saveButton) return;
 
-    fetch(`/recipe/save/${recipeId}/`, {  // URL should match your Django view
+    fetch(`/recipe/${recipeId}/save/`, {  // URL should match your Django view
         method: "POST",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"), // CSRF token for Django security
@@ -24,7 +24,7 @@ function saveToggle(recipeId, btnElement) {
             if (data.isSaved) {
                 saveButton.className = "flex items-center px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:opacity-80 justify-center"
             } else {
-                saveButton.className = "flex items-center px-3 py-1 bg-green-600 text-white rounded-md hover:opacity-80 justify-center"
+                saveButton.className = "flex items-center px-3 py-1 bg-blue-600 text-white rounded-md hover:opacity-80 justify-center"
             }
         })
         .catch(error => console.error("Error:", error));

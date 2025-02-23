@@ -3,72 +3,99 @@
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-    <div class="max-w-lg mx-auto">
-        <h1 class="text-3xl font-bold mb-6">Edit Profile</h1>
+    <div class="min-h-screen flex justify-center py-2">
+        <div class="w-full max-w-lg mx-4">
 
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-xl
+                        {% if message.tags == 'success' %}bg-green-100 text-green-700{% endif %}
+                        {% if message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-            {% for field in form %}
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ field.label }}</label>
 
-                    {% if field.name == 'profile_picture' %}
-                        <div class="mb-4">
-                            {% if user.profile_picture %}
-                                <div class="mb-4">
-                                    <p class="text-sm text-gray-600 mb-2">Current Profile Picture:</p>
-                                    <img src="{{ user.profile_picture.url }}" id="imagePreview"
-                                         alt="Current profile picture"
-                                         class="w-32 h-32 object-cover rounded-lg">
+            <h1 class="text-2xl md:text-3xl font-bold text-center mb-2">Edit Profile</h1>
+
+            <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="space-y-2">
+                        <label class="text-gray-700 text-sm font-medium block">{{ field.label }}</label>
+
+                        {% if field.name == 'profile_picture' %}
+                            <div class="space-y-2">
+                                {% if user.profile_picture %}
+                                    <div class="flex flex-col items-center sm:items-start space-y-2">
+                                        <p class="text-sm text-gray-600">Current Profile Picture:</p>
+                                        <img src="{{ user.profile_picture.url }}"
+                                             id="imagePreview"
+                                             alt="Current profile picture"
+                                             class="w-32 h-32 object-cover rounded-lg border-2 border-gray-200">
+                                    </div>
+                                {% endif %}
+
+                                <div class="flex flex-col items-center sm:items-start">
+                                    <div class="w-full max-w-sm">
+                                        {{ field }}
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-2 text-center sm:text-left">
+                                        Choose a new image to change your profile picture
+                                    </p>
                                 </div>
-                            {% endif %}
+                            </div>
+                        {% else %}
                             {{ field }}
-                            <p class="text-sm text-gray-500 mt-2">Choose a new image to change your profile picture</p>
-                        </div>
-                    {% else %}
-                        {{ field }}
-                    {% endif %}
+                        {% endif %}
 
-                    {% if field.errors %}
-                        {% for error in field.errors %}
-                            <div class="text-red-500 text-sm mt-1">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
+                        {% if field.errors %}
+                            <div class="space-y-1">
+                                {% for error in field.errors %}
+                                    <div class="text-red-500 text-sm">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button type="submit"
+                            class="w-full sm:w-auto py-4 px-6 text-white bg-blue-500 hover:bg-blue-600 rounded-xl transition-colors duration-200">
+                        Save Changes
+                    </button>
+                    <a href="{% url 'users:profile' %}"
+                       class="w-full sm:w-auto py-4 px-6 text-center text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-xl transition-colors duration-200">
+                        Cancel
+                    </a>
                 </div>
-            {% endfor %}
-
-            <div class="flex gap-4">
-                <button type="submit" class="py-4 px-6 text-white bg-blue-500 hover:bg-blue-600 rounded-xl">
-                    Save Changes
-                </button>
-                <a href="{% url 'users:profile' %}"
-                   class="py-4 px-6 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl">
-                    Cancel
-                </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <script>
-
         document.addEventListener('DOMContentLoaded', function () {
             const fileInput = document.querySelector('input[type="file"]');
             const imagePreview = document.getElementById('imagePreview');
 
-            fileInput.addEventListener('change', function () {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
+            if (fileInput && imagePreview) {
+                fileInput.addEventListener('change', function () {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
 
-                    reader.onload = function (e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.classList.remove('hidden');
+                        reader.onload = function (e) {
+                            imagePreview.src = e.target.result;
+                            imagePreview.classList.remove('hidden');
+                            // Ensure the preview container is visible
+                            imagePreview.parentElement.classList.remove('hidden');
+                        }
+
+                        reader.readAsDataURL(this.files[0]);
                     }
-
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
+                });
+            }
         });
     </script>
-
 {% endblock %}

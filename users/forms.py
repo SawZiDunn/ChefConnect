@@ -20,11 +20,11 @@ class CustomUserChangeForm(UserChangeForm):
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
-        'placeholder': 'Your username',
+        'placeholder': 'Username',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
     password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'placeholder': 'Your password',
+        'placeholder': 'Password',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
 
@@ -56,15 +56,15 @@ class RegisterForm(CustomUserCreationForm):
 
     # Add your custom field widgets here
     username = forms.CharField(widget=forms.TextInput(attrs={
-        'placeholder': 'Your username',
+        'placeholder': 'Username',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
     email = forms.EmailField(widget=forms.EmailInput(attrs={
-        'placeholder': 'Your email address',
+        'placeholder': 'Email Address',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={
-        'placeholder': 'Your password',
+        'placeholder': 'Password',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={
@@ -76,7 +76,7 @@ class RegisterForm(CustomUserCreationForm):
     }))
 
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={
-        'placeholder': 'Tell us about yourself',
+        'placeholder': 'Tell others about yourself',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
 
