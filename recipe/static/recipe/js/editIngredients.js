@@ -19,7 +19,6 @@ const ingredientManager = (() => {
 
     // Initialize the component
     function init() {
-        console.log("Hello")
         if (!elements.form) return; // Exit if form not found
 
         // Set up event listeners
@@ -47,6 +46,7 @@ const ingredientManager = (() => {
             const text = element.querySelector('span').textContent;
             const [name, quantityUnit] = text.split(' - ');
             const [quantity, unit] = quantityUnit.split(' ');
+
 
             ingredients.push({
                 id: id,
@@ -126,10 +126,10 @@ const ingredientManager = (() => {
         const unitDisplay = elements.unitsSelect.querySelector(`option[value="${ingredientData.unit}"]`)?.text || ingredientData.unit;
 
         div.innerHTML = `
-        <span>${ingredientData.name} - ${ingredientData.quantity} ${unitDisplay}</span>
-        <button type="button" class="bg-red-500 text-white px-3 py-1 rounded remove-ingredient">
-            Remove
-        </button>
+        <span class="text-sm sm:text-base">${ingredientData.name} - ${ingredientData.quantity} ${unitDisplay}</span>
+         <button type="button" class="remove-instruction text-red-500 hover:text-red-700 remove-ingredient">
+                                        ×
+         </button>
     `;
 
         // Add event listener to remove button

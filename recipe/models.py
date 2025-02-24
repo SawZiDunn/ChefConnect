@@ -24,7 +24,7 @@ class Recipe(models.Model):
     description = models.TextField()
     preparation_time = models.PositiveIntegerField(help_text="Time in minutes")
     servings = models.PositiveIntegerField()
-    food_pic = models.ImageField(upload_to="recipe_pictures/")
+    food_pic = models.ImageField(upload_to="recipe_pictures/", blank=True)
     tags = models.ManyToManyField(Tag, related_name='recipes')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

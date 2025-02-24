@@ -7,8 +7,8 @@ class NutritionalInfoForm(forms.ModelForm):
         model = NutritionalInfo
         fields = ["protein", "carb", "fat", "calories"]
         widgets = {
-            "protein": forms.NumberInput(attrs={"class": "form-control"}),
-            "carb": forms.NumberInput(attrs={"class": "form-control"}),
-            "fat": forms.NumberInput(attrs={"class": "form-control"}),
-            "calories": forms.NumberInput(attrs={"class": "form-control"}),
+            "protein": forms.NumberInput(attrs={"class": "w-full py-2 px-4 rounded-xl"}),
+            "carb": forms.NumberInput(attrs={"class": "w-full py-2 px-4 rounded-xl"}),
+            "fat": forms.NumberInput(attrs={"class": "w-full py-2 px-4 rounded-xl"}),
+            "calories": forms.NumberInput(attrs={"class": "w-full py-2 px-4 rounded-xl"}),
         }

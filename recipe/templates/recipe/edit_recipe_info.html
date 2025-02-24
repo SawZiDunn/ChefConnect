@@ -6,10 +6,9 @@
     <div class="container mx-auto mt-3 p-3 bg-white shadow-lg rounded-lg">
         <h1 class="text-2xl font-bold mb-6">Edit Recipe</h1>
 
-        <form method="post" action="{% url 'recipe:edit' recipe.id %}" enctype="multipart/form-data"
-              class="space-y-6">
+        <form method="post" action="{% url 'recipe:edit' recipe.id %}" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
-            <input type="hidden" name="recipe_id" value="{{ recipe.id }}"> <!-- Hidden field for recipe ID -->
+            <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
 
             <div class="p-4 border rounded-lg bg-gray-50">
                 <h2 class="text-xl font-semibold mb-4">Recipe Details</h2>
@@ -17,21 +16,19 @@
                     <div class="flex flex-col">
                         <label for="title" class="font-medium mb-1">Recipe Title</label>
                         <input type="text" name="title" id="title" value="{{ recipe.title }}" required
-                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="flex flex-col">
                         <label for="description" class="font-medium mb-1">Description</label>
                         <textarea name="description" id="description" rows="3"
-                                  class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">{{ recipe.description }}</textarea>
+                                  class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">{{ recipe.description }}</textarea>
                     </div>
 
-                    <!-- Tag Manager Component -->
                     <div class="space-y-4">
-                        <!-- Existing Tags Dropdown -->
                         <div class="flex flex-col">
                             <label for="tag-select" class="font-medium mb-1">Tag</label>
-                            <select id="tag-select" name="existing_tags" class="border rounded-lg p-2">
+                            <select id="tag-select" name="existing_tags" class="w-full border rounded-lg p-2">
                                 <option value="">Choose tag...</option>
                                 {% for tag in all_tags %}
                                     <option value="{{ tag.id }}">{{ tag.name }}</option>
@@ -39,53 +36,49 @@
                             </select>
                         </div>
 
-                        <!-- New Tag Input -->
-                        <div class="flex">
-                            <input type="text"
-                                   id="new-tag"
-                                   placeholder="Add new tag"
-                                   class="border rounded-lg p-2 flex-grow mr-2">
-                            <button type="button"
-                                    onclick="tagManager.addNewTag()"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="new-tag" placeholder="Add new tag"
+                                   class="w-full border rounded-lg p-2">
+                            <button type="button" onclick="tagManager.addNewTag()"
+                                    class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                                 Add
                             </button>
                         </div>
 
-                        <!-- Selected Tags Display -->
                         <div id="selected-tags" class="flex flex-wrap gap-2">
                             {% for tag in existing_tags %}
                                 <span class="px-3 py-1 bg-gray-300 rounded-lg flex items-center"
                                       data-tag-id="{{ tag.id }}">
-                                    <span>{{ tag.name }}</span>
-                            <button type="button"
-                                    class="text-red-600 font-bold ml-2"
-                                    onclick="tagManager.removeTag('{{ tag.id }}')">&times;</button>
-            </span>
+                                <span>{{ tag.name }}</span>
+                                <button type="button" class="text-red-600 font-bold ml-2"
+                                        onclick="tagManager.removeTag('{{ tag.id }}')">&times;</button>
+                            </span>
                             {% endfor %}
                         </div>
 
-                        <!-- Hidden inputs for form submission -->
                         <input type="hidden" name="existing_tags" id="existing-tags-input">
                         <input type="hidden" name="new_tags" id="new-tags-input">
                     </div>
 
-                    <div class="flex flex-col">
-                        <label for="cooking_time" class="font-medium mb-1">Preparation Time (minutes)</label>
-                        <input type="number" name="cooking_time" id="cooking_time" value="{{ recipe.preparation_time }}"
-                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label for="cooking_time" class="font-medium mb-1">Preparation Time (minutes)</label>
+                            <input type="number" name="cooking_time" id="cooking_time"
+                                   value="{{ recipe.preparation_time }}"
+                                   class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        </div>
 
-                    <div class="flex flex-col">
-                        <label for="servings" class="font-medium mb-1">Servings</label>
-                        <input type="number" name="servings" id="servings" value="{{ recipe.servings }}"
-                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-col">
+                            <label for="servings" class="font-medium mb-1">Servings</label>
+                            <input type="number" name="servings" id="servings" value="{{ recipe.servings }}"
+                                   class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
 
                     <div class="flex flex-col">
                         <label for="image" class="font-medium mb-1">Recipe Image</label>
                         <input type="file" name="food_pic" id="image" accept="image/*"
-                               class="border rounded-lg p-2">
+                               class="w-full border rounded-lg p-2">
                         {% if recipe.food_pic %}
                             <img src="{{ recipe.food_pic.url }}" alt="Recipe Image" id="imagePreview"
                                  class="mt-4 w-32 h-32 object-cover">
@@ -94,35 +87,37 @@
                 </div>
             </div>
 
-
             <div class="p-4 border rounded-lg bg-gray-50">
                 <h2 class="text-xl font-semibold mb-4">Nutritional Info</h2>
-                <div class="flex flex-row">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="flex flex-col">
-                        <label>Protein</label>
-                        <input type="number" name="protein" value="{{ nutrition_info.protein }}">
+                        <label class="font-medium mb-1">Protein</label>
+                        <input type="number" name="protein" value="{{ nutrition_info.protein }}"
+                               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="flex flex-col">
-                        <label>Carb</label>
-                        <input type="number" name="carb" value="{{ nutrition_info.carb }}">
-                    </div>
-                </div>
-
-                <div class="flex flex-row">
-                    <div class="flex flex-col">
-                        <label>Fat</label>
-                        <input type="number" name="fat" value="{{ nutrition_info.fat }}">
+                        <label class="font-medium mb-1">Carb</label>
+                        <input type="number" name="carb" value="{{ nutrition_info.carb }}"
+                               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="flex flex-col">
-                        <label>Calories</label>
-                        <input type="number" name="calories" value="{{ nutrition_info.calories }}">
+                        <label class="font-medium mb-1">Fat</label>
+                        <input type="number" name="fat" value="{{ nutrition_info.fat }}"
+                               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label class="font-medium mb-1">Calories</label>
+                        <input type="number" name="calories" value="{{ nutrition_info.calories }}"
+                               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded">Save Changes</button>
+            <button type="submit" class="w-full sm:w-auto bg-blue-500 text-white px-6 py-2 rounded">Save Changes
+            </button>
         </form>
     </div>
 

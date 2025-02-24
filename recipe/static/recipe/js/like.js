@@ -25,10 +25,10 @@ async function like(recipeId) {
         const data = await response.json()
         if (!data.isLiked) {
             like_button.innerHTML = "Like";
-            like_button.className = "bg-blue-100 p-4 rounded-lg"
+
         } else {
             like_button.innerHTML = "Unlike";
-            like_button.className = "bg-red-100 p-4 rounded-lg"
+    
         }
 
         like_count.textContent = data.total_likes;

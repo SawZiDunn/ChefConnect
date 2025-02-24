@@ -47,17 +47,17 @@
                         <div class="flex flex-col sm:flex-row gap-2 sm:space-x-2">
                             {% if request.user == profile_user %}
                                 <a href="{% url 'users:edit_profile' %}"
-                                   class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
+                                   class="inline-block px-3 py-1 bg-blue-500 rounded-md hover:bg-blue-700 text-white text-center">
                                     Edit Profile
                                 </a>
                                 <a href="{% url 'users:change_password' %}"
-                                   class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
+                                   class="inline-block px-3 py-1 bg-blue-500 rounded-md hover:bg-blue-700 text-white text-center">
                                     Change Password
                                 </a>
                             {% else %}
                                 <button id="follow-button"
                                         onclick="ProfileToggleFollow({{ profile_user.id }})"
-                                        class="w-full sm:w-auto px-4 py-2 {% if is_following %}bg-gray-200 text-gray-700 hover:bg-gray-400{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %} rounded-md">
+                                        class="w-full sm:w-auto px-4 py-2 text-sm {% if is_following %}bg-gray-200 text-gray-700 hover:bg-gray-400{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %} rounded-md">
                                     {% if is_following %}Unfollow{% else %}Follow{% endif %}
                                 </button>
                             {% endif %}
@@ -71,16 +71,16 @@
 
                     <!-- Stats - Better spacing on mobile -->
                     <div class="flex justify-center sm:justify-start space-x-6">
-                        <div class="text-center">
-                            <span class="block font-bold text-xl">{{ recipe_count }}</span>
+                        <div class="text-center text-sm sm:text-base">
+                            <span class="block font-bold">{{ recipe_count }}</span>
                             <span class="text-gray-600">Recipes</span>
                         </div>
-                        <div class="text-center">
-                            <span class="block font-bold text-xl" id="follower_count">{{ follower_count }}</span>
+                        <div class="text-center text-sm sm:text-base">
+                            <span class="block font-bold" id="follower-count">{{ follower_count }}</span>
                             <span class="text-gray-600">Followers</span>
                         </div>
-                        <div class="text-center">
-                            <span class="block font-bold text-xl" id="following_count">{{ following_count }}</span>
+                        <div class="text-center text-sm sm:text-base">
+                            <span class="block font-bold">{{ following_count }}</span>
                             <span class="text-gray-600">Following</span>
                         </div>
                     </div>

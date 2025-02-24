@@ -21,13 +21,12 @@ function toggleFollow(userId) {
         .then(data => {
             if (data.following) {
                 followButton.textContent = "Unfollow";
-                followButton.className = "bg-gray-200 text-gray-700 px-3 py-1 rounded-md hover:opacity-80";
+                followButton.className = "bg-gray-200 text-gray-700 text-sm px-3 py-1 rounded-md hover:opacity-80";
 
 
             } else {
                 followButton.textContent = "Follow";
-                followButton.className = "bg-blue-600 text-white px-3 py-1 rounded-md hover:opacity-80"
-
+                followButton.className = "bg-blue-600 text-white text-sm px-3 py-1 rounded-md hover:opacity-80"
 
             }
 

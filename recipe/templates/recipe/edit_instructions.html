@@ -9,7 +9,7 @@
 
         <form method="POST" id="instruction-form">
             {% csrf_token %}
-            <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
                 <!-- Instruction input -->
                 <div class="mb-6">
                     <div class="p-4 border rounded-lg bg-gray-50">
@@ -20,11 +20,11 @@
                             <div class="flex flex-col">
                                 <label class="font-medium mb-1">Step</label>
                                 <textarea id="instruction-input" rows="2"
-                                          class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                                          class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
                                           placeholder="Enter instruction step"></textarea>
                             </div>
                             <button type="button" id="add-instruction"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+                                    class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded mt-4">
                                 Add Step
                             </button>
                         </div>
@@ -32,10 +32,10 @@
                         <!-- List of instructions -->
                         <div id="instruction-list" class="space-y-2">
                             {% for instruction in recipe_instructions %}
-                                <div class="instruction-item flex items-start space-x-4 p-2 border rounded-lg bg-white">
+                                <div class="instruction-item flex flex-col sm:flex-row items-start space-y-2 sm:space-y-0 sm:space-x-4 p-2 border rounded-lg bg-white">
                                     <span class="instruction-number font-semibold min-w-[2rem]">{{ instruction.step_no }}.</span>
                                     <p class="instruction-text flex-grow">{{ instruction.instruction }}</p>
-                                    <div class="flex space-x-2">
+                                    <div class="flex w-full sm:w-auto justify-end space-x-2 mt-2 sm:mt-0">
                                         <button type="button" class="move-up text-gray-600 hover:text-gray-900 px-2">↑
                                         </button>
                                         <button type="button" class="move-down text-gray-600 hover:text-gray-900 px-2">
@@ -55,13 +55,13 @@
                 <input type="hidden" id="instructions-input" name="instructions" value="">
 
                 <!-- Form buttons -->
-                <div class="mt-6 flex justify-end space-x-4">
+                <div class="mt-6 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
                     <a href="{% url 'recipe:detail' recipe.id %}"
-                       class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                       class="w-full sm:w-auto bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-center">
                         Cancel
                     </a>
                     <button type="submit"
-                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                            class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
                         Save Changes
                     </button>
                 </div>

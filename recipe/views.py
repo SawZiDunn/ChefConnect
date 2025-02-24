@@ -68,7 +68,6 @@ def index(request):
         (61, 'More than 1 hour'),
     ]
 
-    print("prepar", preparation_time)
     context = {
         'recipes': recipes.distinct(),  # to remove duplicates from tag and ingredient filters
         'all_tags': all_tags,
@@ -86,16 +85,20 @@ def index(request):
 
 
 def recipe_detail(request, recipe_id):
-    recipe = Recipe.objects.get(pk=recipe_id)
+    recipe = get_object_or_404(Recipe, id=recipe_id)  # Recipe.objects.get(pk=recipe_id)
     ingredients = RecipeIngredient.objects.filter(recipe=recipe)
     instructions = Instruction.objects.filter(recipe=recipe)
     nutrition_info = NutritionalInfo.objects.get(recipe=recipe)
     tags = recipe.tags.all()  # Tag.objects.filter(recipe=recipe)
 
-    # checks if current user likes this recipe
-    isLiked = Like.objects.filter(user=request.user, recipe=recipe).exists()
+    user = None
+    isLiked = False
 
-    user = recipe.saved_by.all().filter(id=request.user.id).first()
+    if request.user.is_authenticated:
+        # checks if current user likes this recipe
+        isLiked = Like.objects.filter(user=request.user, recipe=recipe).exists()
+
+        user = recipe.saved_by.all().filter(pk=request.user.id).first()
 
     isSaved = True if user else False
 
@@ -178,8 +181,6 @@ def add_recipe(request):
                         tag, created = Tag.objects.get_or_create(name=tag_name)
                         recipe.tags.add(tag)
 
-                messages.success(request, "Recipe added successfully!")
-
                 # Process ingredients
                 ingredients = request.POST.getlist("ingredients[]")
                 new_ingredients = request.POST.getlist("new_ingredients[]")
@@ -215,7 +216,7 @@ def add_recipe(request):
                             raise ValidationError(f"Invalid ingredient selected at position {i + 1}")
 
                     recipe_ingredients.append(
-                        RecipeIngredient(recipe=recipe, ingredient=ingredient, quantity=quantity, units=unit)
+                        RecipeIngredient(recipe=recipe, ingredient=ingredient, quantity=quantity, unit=unit)
                     )
 
                 if recipe_ingredients:
@@ -257,22 +258,33 @@ def add_recipe(request):
             messages.error(request, "An unexpected error occurred. Please try again.")
 
     # GET request or form validation failure
+    ingredient_units = [
+        ("g", "grams"),
+        ("ml", "milliliters"),
+        ("tsp", "teaspoons"),
+        ("tbsp", "tablespoons"),
+        ("cup", "cups"),
+        ("piece", "pieces"),
+
+    ]
 
     context = {
         "nutrition_form": NutritionalInfoForm(),
         "ingredients": Ingredient.objects.all().order_by("name"),
         "tags": Tag.objects.all().order_by("name"),
         "form_data": request.POST if request.method == "POST" else None,
+        "ingredient_units": ingredient_units,
     }
 
     return render(request, "recipe/add_recipe.html", context)
 
 
+@login_required
 def edit_recipe(request, recipe_id: int):
     nutrition_info = NutritionalInfo.objects.get(pk=recipe_id)
     recipe = get_object_or_404(Recipe, pk=recipe_id)
 
-    # Check if user has permission to edit
+    # Check user permission
     if recipe.created_by != request.user:
         messages.error(request, "You don't have permission to edit this recipe")
         return redirect('recipe:detail', recipe_id=recipe_id)
@@ -286,13 +298,13 @@ def edit_recipe(request, recipe_id: int):
 
         try:
             with transaction.atomic():
-                # Update basic recipe fields
+
                 recipe.title = request.POST.get("title")
                 recipe.description = request.POST.get("description")
                 recipe.preparation_time = request.POST.get("cooking_time")  # Changed to match template
                 recipe.servings = request.POST.get("servings")
 
-                # Handle food pic update if provided
+                # Handle food pic update if exists
                 if "food_pic" in request.FILES:
                     recipe.food_pic = request.FILES["food_pic"]
 
@@ -300,7 +312,7 @@ def edit_recipe(request, recipe_id: int):
                 if not all([recipe.title, recipe.description]):
                     raise ValidationError("Title and description are required.")
 
-                # Validate numeric fields
+                # Validate fields
                 for field, value in [("preparation_time", recipe.preparation_time),
                                      ("servings", recipe.servings)]:
                     try:
@@ -376,20 +388,20 @@ def edit_recipe(request, recipe_id: int):
         "ingredient_units": ingredient_units,
     }
 
-    return render(request, "recipe/edit_recipe.html", context)
+    return render(request, "recipe/edit_recipe_info.html", context)
 
 
+@login_required
 def edit_ingredients(request, recipe_id: int):
     recipe = Recipe.objects.get(pk=recipe_id)
     if request.method == "POST":
-        print("submitted")
 
         existing_ingredients = request.POST.get('existing_ingredients', '').split(',')
         new_ingredients = request.POST.get('new_ingredients', '').split(',')
         quantities = request.POST.get('quantities', '').split(',')
         units = request.POST.get('units', '').split(',')
 
-        # delet all ingredients of this recipe first
+        # delete all ingredients of this recipe first
         RecipeIngredient.objects.filter(recipe=recipe).delete()
 
         # Process existing ingredients
@@ -414,6 +426,7 @@ def edit_ingredients(request, recipe_id: int):
                     quantity=quantities[i + len(existing_ingredients)],
                     unit=units[i + len(existing_ingredients)]
                 )
+        messages.success(request, "Recipe Ingredients saved successfully!")
 
         return redirect('recipe:detail', recipe_id=recipe_id)
 
@@ -435,6 +448,7 @@ def edit_ingredients(request, recipe_id: int):
                    "recipe_ingredients": RecipeIngredient.objects.filter(recipe=recipe)})
 
 
+@login_required
 def edit_instructions(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
 
@@ -447,13 +461,14 @@ def edit_instructions(request, recipe_id):
 
         # Create new instructions
         for index, text in enumerate(instructions, 1):
-            if text.strip():  # Only create if text is not empty
+            if text.strip():  # create if text != ""
                 Instruction.objects.create(
                     recipe=recipe,
                     step_no=index,
                     instruction=text
                 )
 
+        messages.success(request, "Recipe Instructions saved successfully!")
         return redirect('recipe:detail', recipe_id=recipe.id)
 
     context = {
@@ -471,7 +486,7 @@ def delete(request, recipe_id: int):
     return redirect("users:profile")
 
 
-# @login_required
+@login_required
 def save(request, recipe_id: id):
     if request.method == "POST":
         recipe = Recipe.objects.get(pk=recipe_id)

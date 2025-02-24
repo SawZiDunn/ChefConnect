@@ -4,32 +4,40 @@
 {% block content %}
 
     <div class="container mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
-        <h1 class="text-2xl font-bold mb-6">Add a New Recipe</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl
+                {% if message.tags == 'success' %}bg-green-100 text-green-700{% endif %}
+                {% if message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h1 class="text-xl font-bold mb-6">Add a New Recipe</h1>
 
         <form method="post" action="{% url 'recipe:add_recipe' %}" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
 
             <div class="p-4 border rounded-lg bg-gray-50">
-
                 <h2 class="text-xl font-semibold mb-4">Recipe Details</h2>
-                <div class="space-y-4">
+                <div class="space-y-4 text-sm">
                     <div class="flex flex-col">
                         <label for="title" class="font-medium mb-1">Recipe Title</label>
                         <input type="text" name="title" id="title" required
-                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="flex flex-col">
                         <label for="description" class="font-medium mb-1">Description</label>
                         <textarea name="description" id="description" rows="3"
-                                  class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                                  class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
 
                     <div class="flex flex-col">
                         <label for="tag" class="font-medium mb-1">Tag</label>
-
-                        <!-- Dropdown to select existing tags -->
-                        <select id="tag-select" name="existing_tags" class="border rounded-lg p-2">
+                        <select id="tag-select" name="existing_tags"
+                                class="w-full border rounded-lg p-2">
                             <option value="">Choose tag...</option>
                             {% for tag in tags %}
                                 <option value="{{ tag.id }}">{{ tag.name }}</option>
@@ -38,39 +46,40 @@
                     </div>
 
                     <!-- Input field for adding a new tag -->
-                    <div class="flex mt-3">
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <input type="text" id="new-tag" placeholder="Add new tag"
-                               class="border rounded-lg p-2 flex-grow mr-2">
+                               class="w-full border rounded-lg p-2">
                         <button type="button" onclick="addNewTag()"
-                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                             Add
                         </button>
                     </div>
 
                     <!-- Display selected tags -->
-                    <div id="selected-tags" class="flex flex-wrap gap-2 mt-3"></div>
+                    <div id="selected-tags" class="flex flex-wrap gap-2"></div>
 
                     <!-- Hidden inputs to store selected tags -->
                     <input type="hidden" name="existing_tags" id="existing-tags-input">
                     <input type="hidden" name="new_tags" id="new-tags-input">
 
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label for="preparation_time" class="font-medium mb-1">Preparation Time (minutes)</label>
+                            <input type="number" name="preparation_time" id="preparation_time"
+                                   class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        </div>
 
-                    <div class="flex flex-col">
-                        <label for="preparation_time" class="font-medium mb-1">Preparation Time (minutes)</label>
-                        <input type="number" name="preparation_time" id="preparation_time"
-                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <div class="flex flex-col">
-                        <label for="servings" class="font-medium mb-1">Servings</label>
-                        <input type="number" name="servings" id="servings"
-                               class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-col">
+                            <label for="servings" class="font-medium mb-1">Servings</label>
+                            <input type="number" name="servings" id="servings"
+                                   class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
 
                     <div class="flex flex-col">
                         <label for="image" class="font-medium mb-1">Recipe Image</label>
                         <input type="file" name="food_pic" id="image" accept="image/*"
-                               class="border rounded-lg p-2">
+                               class="w-full border rounded-lg p-2">
                     </div>
                 </div>
             </div>
@@ -79,8 +88,8 @@
                 <h2 class="text-xl font-semibold mb-4">Ingredients</h2>
 
                 <!-- Ingredient input form -->
-                <div class="ingredient-form space-y-2 p-2 border rounded-lg bg-white mb-4">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="ingredient-form space-y-4 p-2 border rounded-lg bg-white mb-4 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="flex flex-col">
                             <label class="font-medium mb-1">Select Ingredient</label>
                             <select id="ingredient-select" class="border rounded-lg p-2">
@@ -98,7 +107,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="flex flex-col">
                             <label class="font-medium mb-1">Quantity</label>
                             <input type="number" step="0.01" id="quantity"
@@ -115,8 +124,13 @@
                     </div>
                 </div>
 
+                <button type="button" id="add-ingredient"
+                        class="w-full sm:w-auto bg-blue-500 text-white text-sm px-4 py-2 rounded">
+                    Add Ingredient
+                </button>
+
                 <!-- List of added ingredients -->
-                <div id="ingredient-list" class="space-y-2">
+                <div id="ingredient-list" class="space-y-2 text-sm mt-4">
                     <!-- Added ingredients will appear here -->
                 </div>
 
@@ -127,13 +141,9 @@
                     <input type="hidden" name="quantities[]">
                     <input type="hidden" name="units[]">
                 </div>
-
-                <button type="button" id="add-ingredient" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-                    Add Ingredient
-                </button>
             </div>
 
-            <div class="p-4 border rounded-lg bg-gray-50">
+            <div class="p-4 border rounded-lg bg-gray-50 text-sm">
                 <h2 class="text-xl font-semibold mb-4">Instructions</h2>
 
                 <!-- Instruction input form -->
@@ -141,52 +151,53 @@
                     <div class="flex flex-col">
                         <label class="font-medium mb-1">Step</label>
                         <textarea id="instruction-input" rows="2"
-                                  class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                                  class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
                 </div>
 
-                <!-- List of added instructions -->
-                <div id="instruction-list" class="space-y-2">
-                    <!-- Added instructions will appear here -->
-                </div>
-
-                <button type="button" id="add-instruction" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+                <button type="button" id="add-instruction"
+                        class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded">
                     Add Step
                 </button>
+
+                <!-- List of added instructions -->
+                <div id="instruction-list" class="space-y-2 mt-4">
+                    <!-- Added instructions will appear here -->
+                </div>
             </div>
 
-            <div class="p-4 border rounded-lg bg-gray-50">
+            <!-- Nutrition Info Section -->
+            <div class="p-4 border rounded-lg bg-gray-50 text-sm">
                 <h2 class="text-xl font-semibold mb-4">Nutritional Info</h2>
 
-                <div class="flex flex-col">
-                    <div class="flex flex-row">
-                        <div class="flex flex-col">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex flex-col flex-1">
                             <label>Protein</label>
                             {{ nutrition_form.protein }}
                         </div>
 
-                        <div class="flex flex-col">
+                        <div class="flex flex-col flex-1">
                             <label>Carb</label>
                             {{ nutrition_form.carb }}
                         </div>
                     </div>
 
-                    <div class="flex flex-row">
-                        <div class="flex flex-col">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex flex-col flex-1">
                             <label>Fat</label>
                             {{ nutrition_form.fat }}
                         </div>
 
-                        <div class="flex flex-col">
+                        <div class="flex flex-col flex-1">
                             <label>Calories</label>
                             {{ nutrition_form.calories }}
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded">Add Recipe</button>
+            <button type="submit" class="bg-blue-500 text-white text-sm px-6 py-2 rounded">Add Recipe</button>
         </form>
     </div>
 
