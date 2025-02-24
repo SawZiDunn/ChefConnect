@@ -280,7 +280,7 @@ def add_recipe(request):
 
 
 @login_required
-def edit_recipe(request, recipe_id: int):
+def edit_recipe_info(request, recipe_id: int):
     nutrition_info = NutritionalInfo.objects.get(pk=recipe_id)
     recipe = get_object_or_404(Recipe, pk=recipe_id)
 

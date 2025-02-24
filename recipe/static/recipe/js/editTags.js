@@ -14,7 +14,6 @@ tagManager = (() => {
 
     // Initialize the component
     function init() {
-        // Set up event listeners
         elements.tagSelect.addEventListener('change', handleTagSelection);
         elements.newTagInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {

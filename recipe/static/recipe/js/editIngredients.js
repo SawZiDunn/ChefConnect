@@ -1,5 +1,5 @@
 const ingredientManager = (() => {
-    // Private variables
+    // private variables
     let ingredients = [];
 
     // DOM Elements
@@ -17,7 +17,7 @@ const ingredientManager = (() => {
         unitsInput: document.getElementById('units-input')
     };
 
-    // Initialize the component
+    // initialize
     function init() {
         if (!elements.form) return; // Exit if form not found
 
@@ -31,10 +31,10 @@ const ingredientManager = (() => {
         });
         elements.form.addEventListener('submit', handleSubmit);
 
-        // Load initial ingredients
+        // load ingredients
         loadInitialIngredients();
 
-        // Initial update of hidden inputs
+        // update hidden inputs when the page first loads
         updateHiddenInputs();
     }
 
@@ -85,7 +85,7 @@ const ingredientManager = (() => {
                 isNew: false
             });
         } else if (newIngredientName) {
-            // Adding new ingredient
+            // add new ingredient
             addIngredient({
                 name: newIngredientName,
                 quantity: quantity,

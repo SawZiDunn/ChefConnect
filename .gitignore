@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual environment
+# for venv
 venv/
 env/
 
@@ -24,9 +24,6 @@ config/settings/.local
 # Ignore IDE/editor files
 .vscode/
 .idea/
-
-# Ignore static and media files
-/media/
 
 # Ignore build and cache files
 build/

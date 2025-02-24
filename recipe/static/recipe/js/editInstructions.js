@@ -13,9 +13,8 @@ const instructionManager = (() => {
     };
 
     function init() {
-        if (!elements.form) return; // Exit if form not found
+        if (!elements.form) return;
 
-        // Set up event listeners
         elements.addButton.addEventListener('click', handleAddInstruction);
         elements.instructionInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -132,7 +131,6 @@ const instructionManager = (() => {
         if (instructions.length === 0) {
             e.preventDefault();
             alert('Please add at least one instruction');
-            return;
         }
     }
 
@@ -142,5 +140,5 @@ const instructionManager = (() => {
     };
 })();
 
-// Initialize when DOM is ready
+// Initialize when DOM is ready (page loads)
 document.addEventListener('DOMContentLoaded', instructionManager.init);

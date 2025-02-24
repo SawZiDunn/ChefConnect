@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log(newTags);
     }
 
-    // Function to remove a category from the list of selected categories
+    // remove a category from the list of selected categories
     window.removeTag = function (tagId) {
         existingTags = existingTags.filter(id => id !== tagId);
         updateTags();  // Update the displayed categories

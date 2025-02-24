@@ -44,7 +44,7 @@ ROOT_URLCONF = 'chefconnect.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "chefconnect/templates"],  # global templates
+        'DIRS': [BASE_DIR / "templates"],  # global templates in ./templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
