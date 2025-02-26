@@ -483,6 +483,8 @@ def edit_instructions(request, recipe_id):
 def delete(request, recipe_id: int):
     recipe = Recipe.objects.get(pk=recipe_id)
     recipe.delete()
+    
+    messages.success(request, "Recipe Deleted successfully!")
     return redirect("users:profile")
 
 

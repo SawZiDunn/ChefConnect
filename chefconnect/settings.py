@@ -57,7 +57,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'chefconnect.wsgi.application'
+WSGI_APPLICATION = 'chefconnect.wsgi:application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

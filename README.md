@@ -13,8 +13,10 @@ for frontend, and SQLite3 for database.
 ![2](demo/2.png)
 ![2](demo/3.png)
 ![4](demo/4.png)
-![4](demo/5.png)
-![4](demo/5.png)
+![5](demo/5.png)
+![6](demo/6.png)
+![7](demo/7.png)
+![8](demo/8.png)
 
 ## What is ChefConnect?
 
@@ -42,7 +44,7 @@ and following other users to build their culinary network.
 3. Install dependencies
 
 ```bash
-  pip install - r requirements.txt
+  pip install -r requirements.txt
 ```
 
 4. Apply migrations

@@ -62,14 +62,17 @@
 
                     <div class="flex items-center gap-2">
                         {% if user == recipe.created_by %}
-                            <button onclick="confirmDelete()"
-                                    class="flex items-center px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                <span class="hidden sm:inline">Delete</span>
-                            </button>
+                            <form action="{% url 'recipe:delete' recipe_id=recipe.id %}">
+                                {% csrf_token %}
+                                <button onclick="confirmDelete()"
+                                        class="flex items-center px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    <span class="hidden sm:inline">Delete</span>
+                                </button>
+                            </form>
                         {% endif %}
 
 
@@ -177,24 +180,26 @@
                         </div>
                     </div>
 
-                    <!-- Like Button -->
-                    <div class="flex items-center">
-                        <button onclick="like({{ recipe.id }})"
-                                class="bg-blue-100 p-2 md:p-3 rounded-lg hover:text-blue-700">
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                </svg>
+                    {% if request.user.is_authenticated %}
+                        <!-- Like Button -->
+                        <div class="flex items-center">
+                            <button onclick="like({{ recipe.id }})"
+                                    class="bg-blue-100 p-2 md:p-3 rounded-lg hover:text-blue-700">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                    </svg>
 
-                                <span class="text-sm md:text-sm" id="like-button">{% if isLiked %}Unlike{% else %}
-                                    Like {% endif %}</span>
+                                    <span class="text-sm md:text-sm" id="like-button">{% if isLiked %}Unlike{% else %}
+                                        Like {% endif %}</span>
 
 
-                            </div>
-                        </button>
-                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -216,13 +221,15 @@
                         </li>
                     {% endfor %}
                 </ul>
-                {# edit btn #}
-                <div class="flex justify-end mt-4">
-                    <a href="{% url 'recipe:edit_ingredients' recipe_id=recipe.id %}"
-                       class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
-                        Edit
-                    </a>
-                </div>
+                {% if request.user.is_authenticated %}
+                    {# edit btn #}
+                    <div class="flex justify-end mt-4">
+                        <a href="{% url 'recipe:edit_ingredients' recipe_id=recipe.id %}"
+                           class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
+                            Edit
+                        </a>
+                    </div>
+                {% endif %}
             </section>
 
             <!-- Instructions -->
@@ -241,13 +248,15 @@
                     {% endfor %}
                 </ol>
 
-                {# edit btn #}
-                <div class="flex justify-end mt-4">
-                    <a href="{% url 'recipe:edit_instructions' recipe_id=recipe.id %}"
-                       class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
-                        Edit
-                    </a>
-                </div>
+                {% if user.is_authenticated %}
+                    {# edit btn #}
+                    <div class="flex justify-end mt-4">
+                        <a href="{% url 'recipe:edit_instructions' recipe_id=recipe.id %}"
+                           class="inline-block px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700 text-white text-center">
+                            Edit
+                        </a>
+                    </div>
+                {% endif %}
             </section>
         </div>
 
@@ -282,42 +291,46 @@
             <section class="mt-6">
                 <h2 class=" text-2xl font-bold mb-4">Reviews</h2>
 
-                <!-- Review Form -->
-                <form action="{% url 'interactions:review_recipe' recipe_id=recipe.id %}" method="POST" class="mb-4">
-                    {% csrf_token %}
-                    <div class="space-y-4">
-                        <!-- Star Rating -->
-                        <div class="flex items-center gap-2">
-                            <label class="text-gray-700">Rating:</label>
-                            <div class="flex gap-1">
-                                {% for i in "12345" %}
-                                    <button type="button"
-                                            onclick="setRating({{ i }})"
-                                            class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"
-                                            data-rating="{{ i }}">
-                                        ★
-                                    </button>
-                                {% endfor %}
-                            </div>
-                            <input type="hidden" name="rating" id="rating-input" value="">
-                        </div>
+                {% if request.user != recipe.created_by %}
 
-                        <!-- Review Text -->
-                        <div class="flex-col">
-                            <div class="flex-grow">
+                    <!--Form -->
+                    <form action="{% url 'interactions:review_recipe' recipe_id=recipe.id %}" method="POST"
+                          class="mb-4">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <!-- Star Rating -->
+                            <div class="flex items-center gap-2">
+                                <label class="text-gray-700">Rating:</label>
+                                <div class="flex gap-1">
+                                    {% for i in "12345" %}
+                                        <button type="button"
+                                                onclick="setRating({{ i }})"
+                                                class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none"
+                                                data-rating="{{ i }}">
+                                            ★
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="rating" id="rating-input" value="">
+                            </div>
+
+                            <!-- Review Text -->
+                            <div class="flex-col">
+                                <div class="flex-grow">
                                 <textarea name="review-body" rows="2"
                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                           placeholder="Add a review..."></textarea>
-                            </div>
-                            <div class="flex justify-end">
-                                <button type="submit"
-                                        class="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
-                                    Post
-                                </button>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit"
+                                            class="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+                                        Post
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                {% endif %}
 
                 <!-- Review List -->
                 <div class="space-y-4 w-full mx-auto px-2 sm:px-6">
@@ -342,7 +355,7 @@
                                     <div class="flex justify-between items-start w-full">
                                         <a href="{% url 'users:chef-profile' review.user.id %}"
                                            class="font-semibold text-gray-900 hover:text-blue-600 break-words">
-                                            {{ review.user.username }}
+                                            {{ review.user.username | capfirst }}
                                         </a>
 
                                         {% if user == review.user %}
