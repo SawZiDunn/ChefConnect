@@ -1,7 +1,8 @@
 from pathlib import Path
 import os
 import dj_database_url
-from decouple import config
+
+# from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +16,8 @@ SECRET_KEY = 'django-insecure-fdme_d8q0t0uk#a_lvq7_)psp(kv^(*v_iilk!v6@qcr-)u$$i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = ['127.0.0.1']
+# ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS').split(',')
 
 # Application definition
 
@@ -71,7 +73,8 @@ DATABASES = {
     }
 }
 
-DATABASES["default"] = dj_database_url.parse(config('DATABASE_URL'))
+# to connect with external db
+# DATABASES["default"] = dj_database_url.parse(config('DATABASE_URL'))
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

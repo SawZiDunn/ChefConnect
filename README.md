@@ -61,7 +61,7 @@ and following other users to build their culinary network.
 
 ```
 
-### Main Features
+## Main Features
 
 The application is mobile-responsive and includes the following features.
 
@@ -74,42 +74,43 @@ The application is mobile-responsive and includes the following features.
 ### Recipe Management
 
 - Browse and view detailed recipe information
-- Advanced search and filtering system by name, tags, ingredients, rating, and preparation time
-- Comprehensive recipe creation with:
-    - Tag selection from existing tags or creation of new ones
-    - Ingredient assignment from existing ingredients or creation of new ones
-    - Step-by-step instruction management
-    - Detailed nutrition information input (carbohydrates, protein, etc.)
+    - Advanced search and filtering system by name, tags, ingredients, rating, and preparation time
+    - Comprehensive recipe creation with:
+        - Tag selection from existing tags or creation of new ones
+        - Ingredient assignment from existing ingredients or creation of new ones
+        - Step-by-step instruction management
+        - Detailed nutrition information input (carbohydrates, protein, etc.)
 
 - Edit recipe information with:
-
+-
     - Update general information and associated tags
     - Modify ingredient lists, measurements, and units
     - Revise cooking instructions and steps
 
-- Social Interactions
+### Social Interactions
 
-    - Reactions: Give reactions to recipes with total reactions displayed
-    - Rating and Reviews:
+- Reactions: Give reactions to recipes with total reactions displayed
+- Rating and Reviews:
 
-        - Give ratings along with reviews for each recipe
-        - View average ratings and all reviews given by other users
+    - Give ratings along with reviews for each recipe
+    - View average ratings and all reviews given by other users
 
-    - Follow System:
+- Follow System:
 
-        - Build a network by following other culinary enthusiasts
-        - View all followed users in a dedicated section
+    - Build a network by following other culinary enthusiasts
+    - View all followed users in a dedicated section
 
-    - Favorites:
+- Favorites:
 
-        - Save recipes to personal favorites collection
-        - Access all saved recipes easily
+    - Save recipes to personal favorites collection
+    - Access all saved recipes easily
 
-    - User Profile
+### User Profile
 
-        - Edit user information like username, email and profile picture
-        - Change password
-        - View all recipes shared by the user
+- Visit Other user's profile
+- View all recipes shared by the user
+- Edit your own user information like username, email and profile picture
+- Change password
 
 ## Distinctiveness and Complexity
 
@@ -161,7 +162,7 @@ that all other pages extend.
 User uploads are managed in the `media/` directory, with separate folders for profile and
 recipe images.
 
-## Technology Stack
+### Technology Stack
 
 - Backend: Python, Django
 - Frontend: HTML, Tailwind CSS, JavaScript
