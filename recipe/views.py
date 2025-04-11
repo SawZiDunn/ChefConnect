@@ -125,8 +125,8 @@ def add_recipe(request):
         if new_tag_names:
             new_tag_names = new_tag_names.split(",")
 
-        print(tag_ids)
-        print(new_tag_names)
+        # print(tag_ids)
+        # print(new_tag_names)
 
         # Validate tag input
         if not tag_ids and not new_tag_names:

@@ -45,9 +45,9 @@ function FollowingToggleFollow(userId, buttonElement) {
 }
 
 // for profile page
-function ProfileToggleFollow(userId, buttonElement) {
-    // get follow-btn if buttonElement is not passed
-    const followButton = buttonElement || document.getElementById("follow-button");
+function ProfileToggleFollow(userId) {
+  
+    const followButton = document.getElementById("follow-button");
     const followerCount = document.getElementById(`follower-count`);
 
     if (!followButton) return;

@@ -60,8 +60,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // Update hidden input fields
         document.getElementById("existing-tags-input").value = existingTags.join(",");
         document.getElementById("new-tags-input").value = newTags.join(",");
-        console.log(existingTags);
-        console.log(newTags);
+        // console.log(existingTags);
+        // console.log(newTags);
     }
 
     // remove a category from the list of selected categories
