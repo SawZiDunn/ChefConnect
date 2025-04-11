@@ -1,14 +1,17 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let existingTags = [];  // List for existing categories
-    let newTags = [];  // List for new categories
+
+    let tags = {
+        existingTags: [], // List for existing tags
+        newTags: [] // List for new tags
+    }
 
     function addNewTag() {
         let newTagInput = document.getElementById("new-tag");
         let newTag = newTagInput.value.trim();
 
         // Add new category if it's not empty and not already in the list
-        if (newTag !== "" && !newTags.includes(newTag)) {
-            newTags.push(newTag);  // Add to the new tag list
+        if (newTag !== "" && !tags.newTags.includes(newTag)) {
+            tags.newTags.push(newTag);  // Add to the new tag list
             updateTags();  // Update the displayed tag
             newTagInput.value = "";  // Clear the input field
         }
@@ -19,8 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let selectedOption = this.options[this.selectedIndex];
         let tagId = selectedOption.value;
 
-        if (tagId && !existingTags.includes(tagId)) {
-            existingTags.push(tagId);  // Add to the selected categories list
+        if (tagId && !tags.existingTags.includes(tagId)) {
+            tags.existingTags.push(tagId);  // Add to the selected categories list
             updateTags();  // Update the displayed categories
         }
     });
@@ -31,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedContainer.innerHTML = "";  // Clear the existing categories
 
         // Display the selected categories (both new and existing)
-        existingTags.forEach(tagId => {
+        tags.existingTags.forEach(tagId => {
             let categoryTag = document.createElement("span");
             categoryTag.classList.add("px-3", "py-1", "bg-gray-300", "rounded-lg", "flex", "items-center", "space-x-2");
 
@@ -44,8 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
             selectedContainer.appendChild(categoryTag);
         });
 
-        // Display the new categories
-        newTags.forEach(tag => {
+        // Display the new tags
+        tags.newTags.forEach(tag => {
             let categoryTag = document.createElement("span");
             categoryTag.classList.add("px-3", "py-1", "bg-gray-300", "rounded-lg", "flex", "items-center", "space-x-2");
 
@@ -58,21 +61,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // Update hidden input fields
-        document.getElementById("existing-tags-input").value = existingTags.join(",");
-        document.getElementById("new-tags-input").value = newTags.join(",");
-        // console.log(existingTags);
-        // console.log(newTags);
+        document.getElementById("all-tags-input").value = JSON.stringify(tags); // json to string
+        console.log(tags);
+     
     }
 
     // remove a category from the list of selected categories
     window.removeTag = function (tagId) {
-        existingTags = existingTags.filter(id => id !== tagId);
+        tags.existingTags = tags.existingTags.filter(id => id !== tagId);
         updateTags();  // Update the displayed categories
     };
 
     // Function to remove a new category from the list
     window.removeNewTag = function (tag) {
-        newTags = newTags.filter(current_tag => current_tag !== tag);
+        tags.newTags = tags.newTags.filter(current_tag => current_tag !== tag);
         updateTags();  // Update the displayed tags
     };
 

@@ -115,15 +115,15 @@ def add_recipe(request):
         nutrition_form = NutritionalInfoForm(request.POST)
 
         # Process selected tags (existing ones)
-        tag_ids = request.POST.get("existing_tags")  # Get selected tags
+        tags = request.POST.get("all_tags")  # Get selected tags
+        print("tags in string", tags)
+        tags = json.loads(tags) # string to obj
 
-        if tag_ids:
-            tag_ids = tag_ids.split(",")
+        print("all tags", tags)
 
-        new_tag_names = request.POST.get("new_tags")  # Get new tags input
+        tag_ids = tags["existingTags"]
 
-        if new_tag_names:
-            new_tag_names = new_tag_names.split(",")
+        new_tag_names = tags["newTags"]  # Get new tags input
 
         # print(tag_ids)
         # print(new_tag_names)
